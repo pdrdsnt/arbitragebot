@@ -1,0 +1,40 @@
+{
+    "factories": {
+        "SushiSwapV2":{
+            "addr": "0xc35dadb65012ec5796536bd9864ed8773abc74c4#readContract",
+            "func": "getPair"
+        },
+        "BiSwapV2": {
+            "addr": "0x858E3312ed3A876947EA49d572A7C42DE08af7EE",
+            "func": "getPair"
+        },
+        "PancakeV2": {
+            "addr": "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+            "func": "getPair"
+        },
+        "PancakeV3": {
+            "addr": "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
+            "func": "getPool"
+        },
+        "UniswapV3": {
+            "addr": "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7",
+            "func": "getPool"
+        }
+    },
+    "tokens": {
+        "Wrapped BNB (WBNB)": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        "Binance-Peg Ethereum Token (ETH)": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        "Binance-Peg BSC-USD": "0x55d398326f99059fF775485246999027B3197955",
+        "USDC (anyUSDC)": "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7",
+        "SOLANA (SOL)": "0x570a5d26f7765ecb712c0924e4de545b89fd43df",
+        "Binance-Peg Aave Token (AAVE)": "0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+        "Binance-Peg XRP Token (XRP)": "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+        "Binance-Peg BTCB Token (BTCB)": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+        "Binance-Peg Cardano Token (ADA)": "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+        "Binance-Peg Bitcoin Cash Token (BCH)": "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf",
+        "Binance-Peg ChainLink Token (LINK)": "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+        "FLOKI (FLOKI)": "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E",
+        "Pepe (PEPE)": "0x25d887Ce7a35172C62FeBFD67a1856F20FaEbB00",
+        "PancakeSwap Token (Cake)": "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82"
+    }
+}
