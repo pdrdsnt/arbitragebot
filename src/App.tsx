@@ -1,54 +1,21 @@
-import { useEffect, createContext, useState } from "react";
+import { useEffect, createContext, useState} from "react";
 import { ethers } from "ethers";
-import dotenv from "dotenv";
+import chainData from "./assets/chain_data.json"
 import './App.css'
 import PoolPairView from "./PoolPairView";
-dotenv.config();
+import {ExchangesData} from "./types";
 
-export const ctx = createContext({});
+
+export const ctx = createContext<Record<string, Record<string, any>>>({});
 export const abis_context = createContext({})
-
-const exchanges_data: Record<string, Record<string, any>> = {
-  uniswap: {
-    v2: {
-      factory: "0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6",
-      contract: null,
-    },
-    v3: {
-      factory: "0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7",
-      contract: null,
-    },
-  },
-  pancake: {
-    v2: {
-      factory: "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
-      contract: null,
-    },
-    v3: {
-      factory: "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865",
-      contract: null,
-    },
-  },
-  sushi: {
-    v2: {
-      factory: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
-      contract: null,
-    }
-  },
-  biswap: {
-    v2: {
-      factory: "0x858E3312ed3A876947EA49d572A7C42DE08af7EE",
-      contract: null,
-    }
-  },
-}
+const rootData: ExchangesData = chainData.bsc;
 const providers_adresses = [
   "https://binance.llamarpc.com",
-  "https://rpc.ankr.com/bsc",
-  "https://1rpc.io/bnb",
-  "https://bsc.rpc.blxrbdn.com",
+  //"https://rpc.ankr.com/bsc",
+  //"https://1rpc.io/bnb",
+  //"https://bsc.rpc.blxrbdn.com",
 ]
-const pke = process.env.P_KEY!;
+const pke = import.meta.env.VITE_P_KEY!;
 
 const V2_FACTORY_ABI = [
   {
@@ -2424,16 +2391,17 @@ const signers = providers.map((p) => new ethers.Wallet(pke, p));
 const token_addresses = Object.keys(tokens);
 
 
-for (const key of Object.keys(exchanges_data)) {
-  for (const v of Object.keys(exchanges_data[key])) {
-    if (v == "v2") {
-      exchanges_data[key][v]["contract"] = new ethers.Contract(exchanges_data[key][v]["factory"], V2_FACTORY_ABI, signers[0]);
-    } else if (v == "v3") {
-      exchanges_data[key][v]["contract"] = new ethers.Contract(exchanges_data[key][v]["factory"], V3_FACTORY_ABI, signers[0]);
+for (const dex of Object.keys(rootData.dexes) as Array<string> ) {
+  const exchangeData = rootData.dexes[dex];
+  
+    for (const version of Object.keys(rootData.dexes[dex]) as Array<"v2" | "v3">) {
+      const versionData = exchangeData[version];
+      if (versionData && version == "v2"){
+        versionData["contract"] = new ethers.Contract(versionData["factory"], V2_FACTORY_ABI, signers[0]);
+      }
     }
-
-  }
 }
+
 
 const total_tokens = Object.keys(tokens).length;
 
@@ -2457,12 +2425,12 @@ function App() {
 
     setTokenPairs(newTokenPair);
 
-  }, []);
+  }, [pairs]);
 
   return (
     <>
       <ctx.Provider value={{
-        "exchanges_data": exchanges_data,
+        "exchanges_data": rootData,
         "tokens": tokens,
         "abis": {
           "v2": {
