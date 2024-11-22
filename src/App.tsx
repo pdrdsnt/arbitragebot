@@ -1,14 +1,16 @@
-import { useEffect, createContext, useState} from "react";
+import { useEffect, createContext, useState, useContext} from "react";
 import { ethers } from "ethers";
 import chainData from "./assets/chain_data.json"
 import './App.css'
 import PoolPairView from "./PoolPairView";
-import {ExchangesData} from "./types";
+import {Chain} from "./types";
 
 
-export const ctx = createContext<Record<string, Record<string, any>>>({});
+export const ctx = createContext<Chain>(chainData);
+const _ctx = useContext(ctx);
+
 export const abis_context = createContext({})
-const rootData: ExchangesData = chainData.bsc;
+
 const providers_adresses = [
   "https://binance.llamarpc.com",
   //"https://rpc.ankr.com/bsc",
@@ -2391,10 +2393,10 @@ const signers = providers.map((p) => new ethers.Wallet(pke, p));
 const token_addresses = Object.keys(tokens);
 
 
-for (const dex of Object.keys(rootData.dexes) as Array<string> ) {
-  const exchangeData = rootData.dexes[dex];
+for (const dex of Object.keys(_ctx.bsc.dexes) as Array<string> ) {
+  const exchangeData = _ctx.bsc.dexes[dex];
   
-    for (const version of Object.keys(rootData.dexes[dex]) as Array<"v2" | "v3">) {
+    for (const version of Object.keys(_ctx.bsc.dexes[dex]) as Array<"v2" | "v3">) {
       const versionData = exchangeData[version];
       if (versionData && version == "v2"){
         versionData["contract"] = new ethers.Contract(versionData["factory"], V2_FACTORY_ABI, signers[0]);
@@ -2429,23 +2431,7 @@ function App() {
 
   return (
     <>
-      <ctx.Provider value={{
-        "dexes": rootData,
-        "tokens": tokens,
-        "abis": {
-          "v2": {
-            "pool": V2_POOL_ABI,
-            "factory": V2_FACTORY_ABI
-          },
-          "v3": {
-            "pool": V3_POOL_ABI,
-            "factory": V3_FACTORY_ABI,
-          }
-        },
-        "providers": providers,
-        "signers": signers,
-
-      }}>
+      <ctx.Provider value={_ctx}>
         <h1>Defi Pool Monitor</h1>
         <div className="cards_view">
           {tokenpairs.map((pp, idx) => (

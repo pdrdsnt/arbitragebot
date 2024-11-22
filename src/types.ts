@@ -1,12 +1,15 @@
 import { ethers } from "ethers";
 
-
-export type ChainData = {
-    [key: string]: ExchangesData;
+export type Chain = {
+    bsc: ChainData;
 };
 
-export type ExchangesData = {
-    dexes: Exchange; 
+export type ChainData = {
+    dexes: Exchange;
+    tokens: Record<string, string>;
+    abis: any;
+    providers: Array<string>
+    signers: Array<string>
 };
 
 export type Exchange = {
@@ -40,15 +43,15 @@ export default class PoolData {
 
     constructor(
         pair_contract: ethers.Contract,
-        address: string,
-        token0: string,
-        token1: string,
-        volume0: number,
-        volume1: number,
-        price: number,
-        fee: number
-    ){
-        this.pair_contract = pair_contract;
+        address = "",
+        token0 = "",
+        token1 = "",
+        volume0 = 0,
+        volume1 = 0,
+        price = 0,
+        fee = 0
+    ) {
+        this.pair_contract = pair_contract,
         this.address = address;
         this.token0 = token0;
         this.token1 = token1;
@@ -66,7 +69,7 @@ export class PairPath {
     version: string;
     id: string;
 
-    constructor(dex: string,version: string, id: string){
+    constructor(dex: string, version: string, id: string) {
         this.dex = dex;
         this.version = version;
         this.id = id;

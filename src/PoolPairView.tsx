@@ -1,17 +1,17 @@
 
 import { useContext, useState, useEffect, useRef } from "react";
 import { ctx } from "./App";
-import { ethers, toNumber } from "ethers";
-import PoolData, { Exchange, ExchangeVersion, PairPath } from "./types";
+import { toNumber } from "ethers";
+import { ChainData, Exchange, ExchangeVersion, PairPath } from "./types";
 import { BigNumberish } from "ethers";
 export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<string> }) {
 
-    const _ctx: { [key: string]: any } = useContext(ctx);
+    const _ctx: ChainData = useContext(ctx).bsc;
     const _tokens: { [key: string]: string } = _ctx["tokens"]
     const [trigger, setTrigger] = useState(false)
     const pair_paths = useRef<Array<PairPath>>([])
     const isMounted = useRef(true); // Ref to track mounting state
-    const dex_data: React.MutableRefObject<Exchange> = useRef(_ctx.exchanges_data.dexes);
+    const dex_data: React.MutableRefObject<Exchange> = useRef(_ctx.dexes);
     const tokens_id = tokens_addr.map((y) => _ctx.tokens[y]).join("-");
     const ready = useRef(false)
 
