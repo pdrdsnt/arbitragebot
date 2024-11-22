@@ -2430,7 +2430,7 @@ function App() {
   return (
     <>
       <ctx.Provider value={{
-        "exchanges_data": rootData,
+        "dexes": rootData,
         "tokens": tokens,
         "abis": {
           "v2": {

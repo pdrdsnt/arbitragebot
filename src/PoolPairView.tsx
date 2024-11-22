@@ -1,32 +1,54 @@
 
 import { useContext, useState, useEffect, useRef } from "react";
 import { ctx } from "./App";
-import { ethers } from "ethers";
-
+import { ethers, toNumber } from "ethers";
+import PoolData, { Exchange, ExchangeVersion, PairPath } from "./types";
+import { BigNumberish } from "ethers";
 export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<string> }) {
 
     const _ctx: { [key: string]: any } = useContext(ctx);
     const _tokens: { [key: string]: string } = _ctx["tokens"]
-    const [prices, setPrices] = useState<Record<string, number>>({})
     const [trigger, setTrigger] = useState(false)
+    const pair_paths = useRef<Array<PairPath>>([])
     const isMounted = useRef(true); // Ref to track mounting state
-    const pools_data: React.MutableRefObject<Record<string, any>> = useRef({})
-    const dex_data = useRef(_ctx.exchanges_data);
+    const dex_data: React.MutableRefObject<Exchange> = useRef(_ctx.exchanges_data.dexes);
     const tokens_id = tokens_addr.map((y) => _ctx.tokens[y]).join("-");
     const ready = useRef(false)
-    //criando todos contratos na inicializacao
-    useEffect(() => {
-        async function getPoolAddress() {
-            for (const dex of Object.keys(dex_data.current)) {
-                for (const v of Object.keys(dex_data.current[dex])) {
 
-                    if (v == "v3") {
-                        dex_data.current[dex][v].pool = await dex_data.current[dex][v]["contract"].getPool(tokens_addr[0], tokens_addr[1], 500)
-                        console.log( dex_data.current[dex][v].pool)
-                    } else {
-                        dex_data.current[dex][v].pool = await dex_data.current[dex][v]["contract"].getPair(tokens_addr[0], tokens_addr[1])
+    function* createDexIterator(_dex_data: React.MutableRefObject<Exchange>) {
+        const dex_list = dex_data.current;
+        for (const dex of Object.keys(dex_list)) {
+            const dexData = _dex_data.current[dex]
+            for (const version of Object.keys(dexData) as Array<"v2" | "v3">) {
+                const versionData: ExchangeVersion | undefined = dexData[version];
+                if (versionData) {
+                    yield { dex, version, versionData }; // Yield each dex and version data
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        //criando todos contratos de cada exchange relativo ao par representado
+        //essa funcao so vai ser chamada uma vez
+        async function getPoolAddress() {
+
+            for (const { dex, version, versionData } of createDexIterator(dex_data)) {
+                const factoryContract = versionData.contract;
+                if (factoryContract) {
+                    let contract = null;
+                    if (version == "v3") {
+                        contract = await factoryContract.getPool(tokens_addr[0], tokens_addr[1], 500)
                     }
-                    dex_data.current[dex][v][tokens_id] = new ethers.Contract(dex_data.current[dex][v]["pool"], _ctx.abis[v]["pool"], _ctx["signers"][0])
+                    else {
+                        contract = await factoryContract.getPair(tokens_addr[0], tokens_addr[1])
+                    }
+
+                    if (contract) {
+                        //global data
+                        versionData.pools[tokens_id].pair_contract = contract;
+                        pair_paths.current.push(new PairPath(dex, version, tokens_id))
+                    }
                 }
             }
         }
@@ -36,66 +58,36 @@ export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<strin
 
     useEffect(() => {
         console.log('Component mounted');
-        if (!ready.current)return;
+        if (!ready.current) return;
 
+        async function UpdatePoolsAndPathsRef() {
+            let slotData = [];
+            for (const { dex, version, versionData } of createDexIterator(dex_data)) {
+                const factoryContract = versionData.contract;
+                if (factoryContract) {
 
-        async function setData() {
-
-            const p = await GetPoolDataByExchange();
-
-            if (!isMounted) return;
-
-            pools_data.current = p;
-
-            for (const key of Object.keys(p)) {
-                var current_array: Array<any> = p[key]
-                console.log(current_array)
-            }
-        }
-
-        async function GetPoolDataByExchange() {
-
-            let _pool_data: Record<string, any> = {}
-            for (const dex of Object.keys(dex_data.current)) {
-                for (const v of Object.keys(dex_data.current[dex])) {
-                    try {
-                        if (v == "v3") {
-                            let slotData: Array<any> = []
-                            try {
-                                console.log(JSON.stringify(dex_data.current[dex][v][tokens_id]))
-                                slotData = await dex_data.current[dex][v][tokens_id].slot0();
-                            } catch (error) {
-                                console.error(`Error fetching data for :`, error);
-                            }
-                            _pool_data[dex] = slotData
-                            const price = decodeSqrtPriceX96Big(BigInt(slotData[0]))
-                            console.log(price.token0PerToken1)
-                            // Update prices state
-                            setPrices((prevPrices) => {
-                                // Make sure the price is a number before setting it
-                                const newPrices = { ...prevPrices, [dex]: parseFloat(price.token1PerToken0) };
-                                return newPrices;
-                            });
-                        }
-
-                    } catch (error) {
-                        console.error(`Error fetching data for :`, error);
+                    let price: number = 0
+                    if (version == "v3") {
+                        slotData = await versionData.pools[tokens_id].pair_contract.slot0();
+                        price = toNumber(decodeSqrtPriceX96Big(BigInt(slotData[0])))
+                    }
+                    else {
+                        const reserves: Array<BigNumberish> = await versionData.pools[tokens_id].pair_contract.getReserves();
+                        price = toNumber(reserves[1]) / toNumber(reserves[0]);
                     }
                 }
             }
-
-            const prices_difference = prices["uniswap"] - prices["pancake"]
-
-            setPrices((prevPrices) => {
-                // Make sure the price is a number before setting it
-                const newPrices = { ...prevPrices, difference: prices_difference };
-                return newPrices;
-            });
-
-            return _pool_data
         }
 
-        setData();
+        async function UpdateStates() {
+            await UpdatePoolsAndPathsRef();
+            if (!isMounted) return;
+
+
+            
+
+        }
+
 
         return () => {
             isMounted.current = false;
@@ -127,21 +119,17 @@ export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<strin
                     <div key={p}>
                         <li className="pool_data">
                             <div className="pool_data_elemet">{p}</div>
-                            <div className="pool_data_elemet">{prices[p]}</div>
-                        </li>
-                        <li className="pool_address" key={dex_data.current[p]["address"]}>
-                            Address: {dex_data.current[p]["address"]}
+                            
                         </li>
                     </div>
                 ))}
             </ul>
-            <div>{prices["difference"]}</div>
         </>
     );
 }
 
 
-function decodeSqrtPriceX96Big(sqrtPriceX96: BigInt): { token1PerToken0: string; token0PerToken1: string } {
+function decodeSqrtPriceX96Big(sqrtPriceX96: BigInt): string {
     const Q96 = BigInt(2) ** BigInt(96); // 2^96
 
     // Divide by Q96 to get the square root of the price
@@ -151,8 +139,5 @@ function decodeSqrtPriceX96Big(sqrtPriceX96: BigInt): { token1PerToken0: string;
     const token1PerToken0 = Math.pow(sqrtPrice, 2); // (sqrtPrice)^2
     const token0PerToken1 = 1 / token1PerToken0; // Reciprocal of the price
 
-    return {
-        token1PerToken0: token1PerToken0.toString(),
-        token0PerToken1: token0PerToken1.toString(),
-    };
+    return token0PerToken1.toString();
 }
