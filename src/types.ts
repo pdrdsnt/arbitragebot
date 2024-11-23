@@ -1,18 +1,23 @@
 import { ethers } from "ethers";
 
+
 export type Chain = {
-    bsc: ChainData;
+    bsc : ChainData;
 };
 
 export type ChainData = {
-    dexes: Exchange;
+    dexes: Exchanges;
     tokens: Record<string, string>;
     abis: any;
     providers: Array<string>
     signers: Array<string>
 };
 
-export type Exchange = {
+export type Tokens = {
+    [key: string]: TokenData
+};
+
+export type Exchanges = {
     [key: string]: ExchangeData
 };
 
@@ -20,6 +25,11 @@ export type ExchangeData = {
     v2?: ExchangeVersion; // Optional `v2` key
     v3?: ExchangeVersion; // Optional `v3` key
 };
+
+export type TokenData = {
+    name: string;
+    icon: string | null
+}
 
 export type ExchangeVersion = {
     factory: string
