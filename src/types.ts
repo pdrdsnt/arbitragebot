@@ -7,7 +7,7 @@ export type Chain = {
 
 export type ChainData = {
     dexes: Exchanges;
-    tokens: Record<string, string>;
+    tokens: Tokens;
     abis: any;
     providers: Array<string>
     signers: Array<string>

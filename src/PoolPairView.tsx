@@ -2,23 +2,21 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { ctx } from "./App";
 import { toNumber } from "ethers";
-import { ChainData, Exchange, ExchangeVersion, PairPath } from "./types";
+import { ChainData, Exchanges, ExchangeVersion, PairPath } from "./types";
 import { BigNumberish } from "ethers";
 export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<string> }) {
 
-    const _ctx: ChainData = useContext(ctx).bsc;
-    const _tokens: { [key: string]: string } = _ctx["tokens"]
+    const _ctx: ChainData = useContext(ctx);
     const [trigger, setTrigger] = useState(false)
     const pair_paths = useRef<Array<PairPath>>([])
     const isMounted = useRef(true); // Ref to track mounting state
-    const dex_data: React.MutableRefObject<Exchange> = useRef(_ctx.dexes);
     const tokens_id = tokens_addr.map((y) => _ctx.tokens[y]).join("-");
     const ready = useRef(false)
 
-    function* createDexIterator(_dex_data: React.MutableRefObject<Exchange>) {
-        const dex_list = dex_data.current;
+    function* createDexIterator(_dex_data: Exchanges) {
+        const dex_list = _dex_data;
         for (const dex of Object.keys(dex_list)) {
-            const dexData = _dex_data.current[dex]
+            const dexData = _dex_data[dex]
             for (const version of Object.keys(dexData) as Array<"v2" | "v3">) {
                 const versionData: ExchangeVersion | undefined = dexData[version];
                 if (versionData) {
@@ -33,7 +31,7 @@ export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<strin
         //essa funcao so vai ser chamada uma vez
         async function getPoolAddress() {
 
-            for (const { dex, version, versionData } of createDexIterator(dex_data)) {
+            for (const { dex, version, versionData } of createDexIterator(_ctx.dexes)) {
                 const factoryContract = versionData.contract;
                 if (factoryContract) {
                     let contract = null;
@@ -45,7 +43,6 @@ export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<strin
                     }
 
                     if (contract) {
-                        //global data
                         versionData.pools[tokens_id].pair_contract = contract;
                         pair_paths.current.push(new PairPath(dex, version, tokens_id))
                     }
@@ -62,7 +59,7 @@ export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<strin
 
         async function UpdatePoolsAndPathsRef() {
             let slotData = [];
-            for (const { dex, version, versionData } of createDexIterator(dex_data)) {
+            for (const { dex, version, versionData } of createDexIterator(_ctx.dexes)) {
                 const factoryContract = versionData.contract;
                 if (factoryContract) {
 
@@ -111,11 +108,11 @@ export default function PoolPairView({ tokens_addr }: { tokens_addr: Array<strin
         <>
             <div className="token_title_bar">
                 {tokens_addr.map((p) => (
-                    <h4 className="token" key={_tokens[p]}>{_tokens[p]}</h4>
+                    <h4 className="token" key={_ctx.tokens[p].name}> {_ctx.tokens[p].name} </h4>
                 ))}
             </div>
             <ul className="pools_data_view">
-                {Object.keys(dex_data.current).map((p) => (
+                {Object.keys(_ctx.dexes).map((p) => (
                     <div key={p}>
                         <li className="pool_data">
                             <div className="pool_data_elemet">{p}</div>
