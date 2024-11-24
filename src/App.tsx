@@ -7,6 +7,8 @@ import bscAbis from "./assets/bsc/abis.json";
 import './App.css';
 import PoolPairView from "./PoolPairView";
 import { ChainData, Exchanges, Tokens } from "./types";
+import * as Utils from './Utils';
+import PairsList from "./PairsList";
 
 function CurrentChainData(chain: keyof typeof chainsStructure): ChainData {
   const data = chainsStructure[chain] as ChainData;
@@ -37,7 +39,7 @@ const providers = providers_adresses.map((p) => new ethers.JsonRpcProvider(p));
 const signers = providers.map((p) => new ethers.Wallet(pke, p));
 
 // format "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c-0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c"
-const allPairs = GetAllPairs(chainsStructure.bsc.tokens);
+const allPairs = Utils.GetAllPairs(chainsStructure.bsc.tokens);
 console.log(JSON.stringify(allPairs))
 
 function App() {
@@ -50,13 +52,6 @@ function App() {
     return name.split("-")
   }
 
-  function selectPair(pairId: string) {
-    if (selectedPairs.includes(pairId)) {
-      setSelectedPairs((p) => p.filter(pair => pair != pairId))
-    } else {
-      setSelectedPairs((p) => [...p, pairId])
-    }
-  }
 
 
 
@@ -71,59 +66,38 @@ function App() {
     }
   }
 
+  const updateSelectedPairs = (pair: string) => {
+    setSelectedPairs(Utils.selectItemInList(pair, selectedPairs));
+  };
+
   return (
     <>
+
       <div className="title_bar">
         <div className="title_in_bar">Defi Pool Monitor</div>
-        <div className="chain_view">bsc</div>
-        <div className="pairs_view">
-          <ul className="pairs_list">
-            {allPairs.map((pair) => (
-              <div onClick={() => selectPair(pair)}>
-                {GetAdrressesByUniqueId(pair)
-                  .filter((addr) => Object.keys(_ctx.tokens).includes(addr))
-                  .map((addr) => (
-                    <li>{_ctx.tokens[addr].name}</li>
-                  ))}
-              </div>))}
-          </ul>
-        </div>
       </div>
-      <ctx.Provider value={_ctx}>
-        <div className="cards_view">
-          {selectedPairs.map((pair) => (
-            <div className={"pool_card"} key={pair}>
-              <PoolPairView
-                tokens_addr={GetAdrressesByUniqueId(pair)} />
-            </div>
+      <div className="main_view">
+        <PairsList
+          allPairs={allPairs}
+          updateParent={updateSelectedPairs}>
+        </PairsList>
+        <ctx.Provider value={_ctx}>
+          <div className="cards_view">
+            {selectedPairs.map((pair) => (
+              <div className={"pool_card"} key={pair}>
+                <PoolPairView
+                  tokens_addr={GetAdrressesByUniqueId(pair)} />
+              </div>
+            ))
+            }
+          </div>
+        </ctx.Provider>
+      </div >
 
-          ))
-          }
-        </div>
-      </ctx.Provider>
+
 
     </>
   )
-}
-
-function PairUniqueId(addr0: string, addr1: string): string {
-  const sortedTokens = [addr0, addr1].sort();
-  return sortedTokens.join("-");
-}
-
-function GetAllPairs(tokens: Record<string, string>): Array<string> {
-  let pairs = [];
-  const total_tokens = Object.keys(tokens).length;
-  const token_addresses = Object.keys(tokens);
-
-  for (let i = 0; i < total_tokens - 1; i++) {
-    for (let j = i + 1; j < total_tokens; j++) {
-      const pair = [token_addresses[i], token_addresses[j]];
-      pairs.push(PairUniqueId(pair[0], pair[1]));
-    }
-  }
-
-  return pairs;
 }
 
 export default App
