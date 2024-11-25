@@ -71,11 +71,19 @@
 
 .pool_data{
   justify-content:space-evenly;
+  display: block;
   margin-top: 1em;
+  justify-items: left;
 }
 
 .pool_data_element{
-  flex: 1 1 calc(33.33% - 20px)
+  display: flexbox;
+  flex: 1 1 calc(33.33% - 20px);
+  margin-left: 22em;
+}
+
+.pool_data_dex_titile{
+  text-align: left;
 }
 
 .pairs_list{

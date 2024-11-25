@@ -9,8 +9,8 @@ export type ChainData = {
     dexes: Exchanges;
     tokens: Tokens;
     abis: any;
-    providers: Array<string>
-    signers: Array<string>
+    providers: Array<ethers.JsonRpcProvider>
+    signers: Array<ethers.ContractRunner>
 };
 
 export type Tokens = {
@@ -43,6 +43,8 @@ export type Pools = {
 
 export default class PoolData {
     pair_contract: ethers.Contract;
+    dex: string;
+    version: string;
     address: string;
     token0: string;
     token1: string;
@@ -53,15 +55,19 @@ export default class PoolData {
 
     constructor(
         pair_contract: ethers.Contract,
-        address = "",
-        token0 = "",
-        token1 = "",
+        dex: string,
+        version: string,
+        address: string,
+        token0: string,
+        token1: string,
         volume0 = 0,
         volume1 = 0,
         price = 0,
         fee = 0
     ) {
-        this.pair_contract = pair_contract,
+        this.pair_contract = pair_contract;
+        this.dex = dex;
+        this.version = version;
         this.address = address;
         this.token0 = token0;
         this.token1 = token1;

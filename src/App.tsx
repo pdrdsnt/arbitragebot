@@ -5,7 +5,7 @@ import bscDexes from "./assets/bsc/dexes.json";
 import bscTokens from "./assets/bsc/tokens.json";
 import bscAbis from "./assets/bsc/abis.json";
 import './App.css';
-import PoolPairView from "./PoolPairView";
+import PoolPairView from "./PoolsView";
 import { ChainData, Exchanges, Tokens } from "./types";
 import * as Utils from './Utils';
 import PairsList from "./PairsList";
@@ -40,13 +40,14 @@ const signers = providers.map((p) => new ethers.Wallet(pke, p));
 
 // format "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c-0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c"
 const allPairs = Utils.GetAllPairs(chainsStructure.bsc.tokens);
-console.log(JSON.stringify(allPairs))
+//console.log(JSON.stringify(allPairs))
 
 function App() {
 
   const [selectedPairs, setSelectedPairs] = useState<Array<string>>([allPairs[0]])
   const _ctx = useContext(ctx);
-
+  _ctx.signers = signers;
+  _ctx.providers = providers;
 
   function GetAdrressesByUniqueId(name: string): Array<string> {
     return name.split("-")
@@ -62,11 +63,13 @@ function App() {
       const versionData = exchangeData[version];
       if (versionData && version == "v2") {
         versionData.contract = new ethers.Contract(versionData.factory, _ctx.abis.V2_FACTORY_ABI, signers[0]);
+      }else if (versionData && version == "v3"){
+        versionData.contract = new ethers.Contract(versionData.factory, _ctx.abis.V3_FACTORY_ABI, signers[0]);
       }
     }
   }
 
-  const updateSelectedPairs = (pair: string) => {
+  const UpdateListOfSelectedPairs = (pair: string) => {
     setSelectedPairs(Utils.selectItemInList(pair, selectedPairs));
   };
 
@@ -78,8 +81,10 @@ function App() {
       </div>
       <div className="main_view">
         <PairsList
+          seleted = {selectedPairs}
           allPairs={allPairs}
-          updateParent={updateSelectedPairs}>
+          updateParent={UpdateListOfSelectedPairs}
+          >
         </PairsList>
         <ctx.Provider value={_ctx}>
           <div className="cards_view">
