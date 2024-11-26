@@ -1,4 +1,5 @@
-import { Tokens } from "./types";
+import { PoolData, TokenData, Tokens } from "./types";
+import { BigNumber } from "bignumber.js"
 
 export function GetAdrressesByUniqueId(name: string): Array<string> {
     return name.split("-");
@@ -40,15 +41,65 @@ export function GetAllPairs(tokens: Record<string, string>): Array<string> {
     return pairs;
 }
 
-export function decodeSqrtPriceX96Big(sqrtPriceX96: BigInt) {
-    const Q96 = BigInt(2) ** BigInt(96); // 2^96
+export function decodeSqrtPriceX96Big(sqrtPriceX96: bigint, tokens: Array<TokenData>): number {
+    const decimals_diff = tokens[0].decimals - tokens[1].decimals;
+    const Q96 = 2n ** 96n; // 2^96
 
-    // Divide by Q96 to get the square root of the price
-    const sqrtPrice = Number(sqrtPriceX96) / Number(Q96);
+    const sqrtPrice = new BigNumber(sqrtPriceX96.toString()).div(Q96.toString());
+    const price = sqrtPrice.pow(2);
+    const decimals_scale = new BigNumber(10).pow(decimals_diff);
 
-    // Calculate prices
-    const token1PerToken0 = Math.pow(sqrtPrice, 2); // (sqrtPrice)^2
-    const token0PerToken1 = 1 / token1PerToken0; // Reciprocal of the price
+    const token1PerToken0 = price.multipliedBy(decimals_scale);
 
-    return token1PerToken0.toString();
+    return Number(token1PerToken0.toString());
+}
+
+export async function getNearestInitializedTicks(poolData: PoolData) {
+    // Calculate the word position and bit position
+    const wordPosition = Math.floor(poolData.tick / 2 ** 8);
+    const bitPosition = Math.floor((poolData.tick % 2 ** 8) / 10);
+
+    // Fetch the tick bitmap
+    const tickBitmap = await poolData.contract.tickBitmap(wordPosition);
+
+    // Check current tick initialization
+    if ((tickBitmap & (1 << bitPosition)) !== 0) {
+        const tickData = await poolData.contract.ticks(poolData.tick);
+        return { tick: poolData.tick, tickData };
+    }
+
+    // Scan for nearest initialized ticks
+    let searchUp = poolData.tick;
+    let searchDown = poolData.tick;
+    while (true) {
+        searchUp += 10;
+        searchDown -= 10;
+
+        try {
+            const tickDataUp = await poolData.contract.ticks(searchUp);
+            return { tick: searchUp, tickData: tickDataUp };
+        } catch {}
+
+        try {
+            const tickDataDown = await poolData.contract.ticks(searchDown);
+            return { tick: searchDown, tickData: tickDataDown };
+        } catch {}
+    }
+}
+
+export async function getTickData(poolData: PoolData,currentTick: number) {
+    const wordPosition = Math.floor(currentTick / 256);  // Which bitmap word contains the tick
+    const bitPosition = currentTick % 256;  // Which bit represents the tick in that word
+
+    // Fetch the tickBitmap for the word containing the currentTick
+    const tickBitmap = await poolData.contract.tickBitmap(wordPosition);
+
+    // Check if the tick is initialized
+    if ((tickBitmap & (1 << bitPosition)) === 0) {
+        throw new Error(`Tick ${currentTick} is uninitialized.`);
+    }
+
+    // If initialized, retrieve the tick data
+    const tickData = await poolData.contract.ticks(currentTick);
+    return tickData;
 }

@@ -1,3 +1,4 @@
+/* Responsividade geral */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -5,104 +6,115 @@
   text-align: center;
 }
 
-.cards_view{
-  margin: 4em;
-  justify-content: center;
+/* Grid responsivo */
+.cards-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin: 2em auto;
   background-color: rgba(137, 43, 226, 0.023);
-  width: 80%;
+  width: 90%;
+  margin-bottom: 2em;
 }
 
-.token_title_bar {
+.token-title-bar {
   background-color: #000000;
-  gap: 10px;
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap; /* Ajusta o layout em telas menores */
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em;
+  margin-bottom: 2em;
 }
 
-.title_bar{
-  min-height: auto;
-  background-color: #000000;
+.token-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+  align-items: center;
+  margin-left: 1em;
 }
 
-.title_in_bar{
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size:x-large;
-
-}
-
-.token {
-  font: 1em sans-serif;
-  will-change: filter;
+.pool-card {
+  background-color: rgb(36, 13, 13);
+  padding: 1em; /* Adiciona padding interno */
+  border-radius: 8px; /* Melhora estética */
   transition: filter 300ms;
 }
 
-.token:hover {
-  filter: drop-shadow(0px 4px 6px rgba(248, 246, 246, 0.2));
-  filter: hue-rotate(90deg);
-}
-
-.pool_card {
-  flex: 1 1 calc(33.33% - 20px);
-  margin-right: 8px;
-  height: fit-content;
-  width: 100%; 
-  will-change: filter;
-  transition: filter 300ms;
-  background-color: rgb(82, 22, 22);
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.pools_data_view {
-  justify-self: stretch;
-  width: fit-content;
-  height: fit-content;
-}
-
-.pool_address{
-  font-size: 2%;
-  font-stretch: extra-condensed;
-}
-
-.pool_card:hover{
+.pool-card:hover {
   filter: drop-shadow(0em 0em 4em black);
 }
 
-
-.pool_data{
-  justify-content:space-evenly;
-  display: block;
-  margin-left: 1em;
-  margin-top: .5em;
-  justify-items: left;
+/* Informações do pool */
+.pool-data {
+  padding: 1em;
+  background-color: rgb(26, 8, 48);
+  border-radius: 8px; /* Adiciona bordas arredondadas */
 }
 
-.pool_data_element{
-  display: flexbox;
-  flex: 1 1 calc(33.33% - 20px);
-  margin-left: 22em;
+.pool-data-element {
+  font-size: medium;
+  padding: 0.5em;
+  background-color: rgb(129, 34, 34);
+  border-radius: 4px;
+  margin-bottom: 0.5em;
 }
 
-.pool_data_dex_title{
+.pool-data-dex-title {
   text-align: left;
+  font-size: .5rem;
 }
-
-.pairs_list{
-  justify-self:flex-start;
-  height: fit-content;
-  display: flexbox;
-  width: auto;
+.pool-data-dex-data {
+  text-align: left;
+  font-size: 1em;
 }
-
-.pair_name{
-  align-self:self-start;
-  width: 10em;
-  display: block;
-  margin-top: 2px;
-  
-}
-
-.main_view {
-  margin-top: 2em;
+.pairs-list {
   display: flex;
+  flex-direction: column;
+}
+
+.pool-data-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite que os elementos fiquem empilhados em telas menores */
+  gap: 1.5em;
+}
+
+.pool-address {
+  font-size: 0.35rem; /* Ajusta tamanho para leitura */
+  font-stretch: extra-condensed;
+}
+
+.pair-name {
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.main-view {
+  display: flex;
+  flex-wrap: wrap; /* Ajusta layout em telas menores */
+  justify-content: center;
+  margin-top: 2em;
+}
+
+/* Responsividade específica */
+@media (max-width: 768px) {
+  .cards-view {
+    width: 95%;
+    gap: 15px;
+  }
+
+  .pool-data-container {
+    flex-direction: column; /* Empilha elementos em telas menores */
+    gap: 1em;
+  }
+
+  .pool-data-element {
+    font-size: small; /* Reduz tamanho da fonte */
+  }
+
+  .token-title-bar {
+    padding: 0.5em;
+    flex-direction: column; /* Alinha em coluna */
+    gap: 1em;
+  }
 }

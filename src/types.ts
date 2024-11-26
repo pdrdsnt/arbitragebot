@@ -29,7 +29,9 @@ export type ExchangeData = {
 
 export type TokenData = {
     name: string;
-    icon: string | null
+    icon: string | null;
+    decimals: number;
+    contract: ethers.Contract | null;
 }
 
 export type ExchangeVersion = {
@@ -42,44 +44,39 @@ export type Pools = {
     [key: string]: PoolData
 };
 
-export default class PoolData {
-    pair_contract: ethers.Contract;
+export class PoolData {
+    contract: ethers.Contract;
     dex: string;
     version: string;
     address: string;
     token0: string;
     token1: string;
-    volume0: number;
-    volume1: number;
+    volume: string
     price: number;
     fee: number;
-
     constructor(
-        pair_contract: ethers.Contract,
+        contract: ethers.Contract,
         dex: string,
         version: string,
         address: string,
         token0: string,
         token1: string,
-        volume0 = 0,
-        volume1 = 0,
+        volume = "",
         price = 0,
-        fee = 0
-    ) {
-        this.pair_contract = pair_contract;
+        fee = 0,
+    ){
+        this.contract = contract;
         this.dex = dex;
         this.version = version;
         this.address = address;
         this.token0 = token0;
         this.token1 = token1;
-        this.volume0 = volume0;
-        this.volume1 = volume1;
+        this.volume = volume;
         this.price = price;
         this.fee = fee;
     }
 
 };
-
 
 export class PairPath {
     dex: string;

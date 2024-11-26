@@ -53,9 +53,6 @@ function App() {
     return name.split("-")
   }
 
-
-
-
   for (const dex of Object.keys(_ctx.dexes) as Array<string>) {
     const exchangeData = _ctx.dexes[dex];
 
@@ -87,14 +84,15 @@ function App() {
           >
         </PairsList>
         <ctx.Provider value={_ctx}>
-          <div className="cards_view">
+          <div className="cards-view">
             {selectedPairs.map((pair) => (
-              <div className={"pool_card"} key={pair}>
+              <div className={"pool-card"} key={pair}>
                 <PoolPairView
                   tokens_addr={GetAdrressesByUniqueId(pair)} />
               </div>
             ))
             }
+             <div className="analyzer">hhuman after all</div>
           </div>
         </ctx.Provider>
       </div >
