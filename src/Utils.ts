@@ -53,7 +53,7 @@ export function decodeSqrtPriceX96Big(sqrtPriceX96: bigint, tokens: Array<TokenD
 
     return Number(token1PerToken0.toString());
 }
-
+/*
 export async function getNearestInitializedTicks(poolData: PoolData) {
     // Calculate the word position and bit position
     const wordPosition = Math.floor(poolData.tick / 2 ** 8);
@@ -86,7 +86,7 @@ export async function getNearestInitializedTicks(poolData: PoolData) {
         } catch {}
     }
 }
-
+*/
 export async function getTickData(poolData: PoolData,currentTick: number) {
     const wordPosition = Math.floor(currentTick / 256);  // Which bitmap word contains the tick
     const bitPosition = currentTick % 256;  // Which bit represents the tick in that word

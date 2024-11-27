@@ -1,6 +1,6 @@
 
 import { useContext, useState, useEffect, useRef } from "react";
-import { ctx } from "./App";
+import { ctx, pools } from "./App";
 import { BigNumber } from "bignumber.js"
 import {PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
 import { ethers } from "ethers";
@@ -9,6 +9,7 @@ import { Contract } from "ethers";
 export default function PoolsView({ tokens_addr }: { tokens_addr: Array<string> }) {
 
     const _ctx: ChainData = useContext(ctx);
+    let _pools: Array<PoolData> = useContext(pools);
     const [trigger, setTrigger] = useState(false)
     const [poolsData, setPoolsData] = useState<Array<PoolData>>([])
     const isMounted = useRef(true); // Ref to track mounting state
@@ -77,6 +78,7 @@ export default function PoolsView({ tokens_addr }: { tokens_addr: Array<string> 
         }
         initializeContracts();
         ready.current = true;
+        console.log("pools in pair view = " + (pools).toString())
     }, [])
 
     useEffect(() => {
@@ -127,6 +129,7 @@ export default function PoolsView({ tokens_addr }: { tokens_addr: Array<string> 
 
             if (!isMounted) return;
             setPoolsData(_poolsData)
+            _pools = [..._poolsData]
         }
 
         UpdateStates();
@@ -143,7 +146,7 @@ export default function PoolsView({ tokens_addr }: { tokens_addr: Array<string> 
         // Set an interval to update the trigger every 0.5 seconds
         const interval = setInterval(() => {
             setTrigger((prev) => !prev); // Toggle the trigger value
-        }, 5000);
+        }, 600);
 
         // Cleanup the interval when the component unmounts
         return () => clearInterval(interval);
@@ -152,14 +155,14 @@ export default function PoolsView({ tokens_addr }: { tokens_addr: Array<string> 
     return (
         <>
             <div className="token_title_bar">
-                <div className="tokens-names-in-card">
+                <div className="tokens-names-in-card" key={tokens_id + "0"}>
                     {GetNamesByUniqueId(tokens_id, _ctx.tokens, " /").map((p) => (
                         <>
                             <h4 className="token" key={p}> {p} </h4>
                         </>
                     ))}
                 </div>
-                <div className="tokens-names-in-card">
+                <div className="tokens-names-in-card" key={tokens_id + "1"}>
                     {tokens_addr.map((p) => (
                         <>
                             <h4 className="pool-address" key={p + "in title"}> {p} </h4>

@@ -10,7 +10,7 @@ export type ChainData = {
     dexes: Exchanges;
     tokens: Tokens;
     abis: any;
-    providers: Array<ethers.JsonRpcProvider>
+    providers: Array<ethers.WebSocketProvider>
     signers: Array<ethers.ContractRunner>
 };
 
