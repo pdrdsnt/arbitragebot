@@ -1,3 +1,4 @@
+import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
 
 
@@ -11,7 +12,7 @@ export type ChainData = {
     tokens: Tokens;
     abis: any;
     providers: Array<ethers.WebSocketProvider>
-    signers: Array<ethers.ContractRunner>
+    signers: Array<ethers.JsonRpcSigner>
 };
 
 export type Tokens = {
@@ -51,8 +52,8 @@ export class PoolData {
     address: string;
     token0: string;
     token1: string;
-    volume: string
-    price: number;
+    volume: BigNumber
+    price: BigNumber;
     fee: number;
     constructor(
         contract: ethers.Contract,
@@ -61,9 +62,9 @@ export class PoolData {
         address: string,
         token0: string,
         token1: string,
-        volume = "",
-        price = 0,
-        fee = 0,
+        volume = BigNumber(0),
+        price = BigNumber(0),
+        fee = 500,
     ){
         this.contract = contract;
         this.dex = dex;

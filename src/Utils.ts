@@ -1,12 +1,14 @@
-import { PoolData, TokenData, Tokens } from "./types";
+import { PoolData, TokenData} from "./types";
 import { BigNumber } from "bignumber.js"
+import { ctx } from './App';
+import { useContext } from "react";
 
 export function GetAdrressesByUniqueId(name: string): Array<string> {
     return name.split("-");
 }
 
-export function GetNamesByUniqueId(name: string, names: Tokens, div: string = ""): Array<string> {
-    const arr: Array<string> = name.split("-").map((s) => names[s].name);
+export function GetNamesByUniqueId(name: string, div: string = ""): Array<string> {
+    const arr: Array<string> = name.split("-").map((s) => useContext(ctx).tokens[s].name);
     arr[0] += div;
     return arr;
 }
@@ -26,14 +28,13 @@ export function PairUniqueId(addr0: string, addr1: string): string {
     return sortedTokens.join("-");
 }
 
-export function GetAllPairs(tokens: Record<string, string>): Array<string> {
+export function GetAllPairs(tokens: Array<string>): Array<string> {
     let pairs = [];
-    const total_tokens = Object.keys(tokens).length;
-    const token_addresses = Object.keys(tokens);
+    const total_tokens = tokens.length;
 
     for (let i = 0; i < total_tokens - 1; i++) {
         for (let j = i + 1; j < total_tokens; j++) {
-            const pair = [token_addresses[i], token_addresses[j]];
+            const pair = [tokens[i], tokens[j]];
             pairs.push(PairUniqueId(pair[0], pair[1]));
         }
     }
@@ -41,17 +42,32 @@ export function GetAllPairs(tokens: Record<string, string>): Array<string> {
     return pairs;
 }
 
-export function decodeSqrtPriceX96Big(sqrtPriceX96: bigint, tokens: Array<TokenData>): number {
+export function decodeSimplePrice(reserves: bigint[],tokens: Array<TokenData>) : BigNumber{
+
+    const reserve0 = new BigNumber(reserves[0].toString());
+    const reserve1 = new BigNumber(reserves[1].toString());
+    const priceBigNumber = reserve1.div(reserve0);
     const decimals_diff = tokens[0].decimals - tokens[1].decimals;
-    const Q96 = 2n ** 96n; // 2^96
+    const decimals_scale = BigNumber(10).pow(decimals_diff);
+    const adjustedPrice = priceBigNumber.multipliedBy(decimals_scale);
+
+    const roundedPrice = adjustedPrice.decimalPlaces(18); // Adjust to desired precision (e.g., 8 decimals)
+    return roundedPrice;
+
+}
+
+export function decodeSqrtPriceX96Big(sqrtPriceX96: bigint, tokens: Array<TokenData>): BigNumber {
+    const decimals_diff = tokens[0].decimals - tokens[1].decimals;
+    const Q96 = BigNumber(2).pow(96); // 2^96
 
     const sqrtPrice = new BigNumber(sqrtPriceX96.toString()).div(Q96.toString());
     const price = sqrtPrice.pow(2);
     const decimals_scale = new BigNumber(10).pow(decimals_diff);
+    // Final price with decimals adjustment
+    const adjustedPrice = price.multipliedBy(decimals_scale);
 
-    const token1PerToken0 = price.multipliedBy(decimals_scale);
-
-    return Number(token1PerToken0.toString());
+    const roundedPrice = adjustedPrice.decimalPlaces(18); // Adjust to desired precision (e.g., 8 decimals)
+    return roundedPrice;
 }
 /*
 export async function getNearestInitializedTicks(poolData: PoolData) {
