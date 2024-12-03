@@ -41,14 +41,12 @@ function TokenSelector({
       <div>
         <input
           readOnly
-          value="select tokens"
-          placeholder="Select tokens..."
           onClick={toggleDropdown}
           style={{
             cursor: "pointer",
             padding: "1px",
             border: "1em solid black",
-            width: "auto",
+            justifyContent: "flex-end",
             outline: "none",
             boxShadow: "none",
           }}
@@ -85,8 +83,11 @@ function TokenSelector({
                   background: selectedTokens.includes(token)
                     ? "rgb(26, 8, 48)"
                     : "black",
-                  color: selectedTokens.includes(token) ? "black" : "white",
+                  color: selectedTokens.includes(token) ? "grey" : "white",
+                  transition: "background-color 2.8 easy-in-out",
                 }}
+                onMouseEnter={(e: any) => (e.target.style.backgroundColor = "rgb(26, 8, 48)")}
+                onMouseLeave={(e: any) => (e.target.style.backgroundColor =  selectedTokens.includes(token) ? "rgb(20, 28, 40)" : "black")}
                 onClick={() => handleTokenSelect(token)}
               >
                 {_ctx.tokens[token].name}
@@ -96,9 +97,9 @@ function TokenSelector({
             <li
               style={{
                 padding: "10px",
-                textAlign: "center",
-                color: "white",
-              }}
+                textAlign: "center",}}
+                onMouseEnter={(e: any) => (e.target.style.backgroundColor = "black")}
+                onMouseLeave={(e: any) => (e.target.style.backgroundColor = "white")}
             >
               No tokens available
             </li>

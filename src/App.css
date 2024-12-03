@@ -37,7 +37,8 @@
 
 /* Tokens Names */
 .tokens-names-in-card {
-  display: flex;
+  display: flexbox;
+  font-size: 50%;
 }
 
 /* Pool Card */
@@ -104,11 +105,10 @@
 
 .title-in-bar{
   color: #d82e2e;
-  font-family:monospace;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   font-size: xx-large;
-  align-self: flex-start;
-  margin-left: 2em;
-  padding-top: 2em;
+  margin-left: 0.2em;
+  padding-top: 0.2em;
 }
 /* Mini Title Bar */
 .mini-title-bar {
@@ -131,7 +131,7 @@
 
 /* Pool Address */
 .address {
-  font-size: 0.35rem;
+  font-size: .75rem;
   font-stretch: extra-condensed;
 }
 

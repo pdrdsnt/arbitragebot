@@ -4,7 +4,7 @@ import { ctx } from "./App";
 import { BigNumber } from "bignumber.js"
 import {PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
 import { ethers } from "ethers";
-import { decodeSimplePrice, decodeSqrtPriceX96Big, GetAdrressesByUniqueId, GetNamesByUniqueId, PairUniqueId } from "./Utils";
+import {GetNamesByUniqueId, PairUniqueId, UpdateV2Data, UpdateV3Data } from "./Utils";
 import PoolsSeeker from "./PoolsSeeker";
 export default function PoolsContainer({ tokens_addr,_pools }: { tokens_addr: Array<string> , _pools: Dispatch<SetStateAction<PoolData[]>> }) {
 
@@ -57,12 +57,14 @@ export default function PoolsContainer({ tokens_addr,_pools }: { tokens_addr: Ar
                     }
                     if (poolAddress && poolAddress != "0x0000000000000000000000000000000000000000") {
                         const pd: PoolData = new PoolData(
+                            tokens_id,
                             poolContract,
                             dex,
                             version,
                             poolAddress,
-                            tokens_addr[0],
-                            tokens_addr[1]
+                            _ctx.tokens[tokens_addr[0]],
+                            _ctx.tokens[tokens_addr[1]],
+                            []
                         )
 
                         //updating context tree
@@ -90,34 +92,23 @@ export default function PoolsContainer({ tokens_addr,_pools }: { tokens_addr: Ar
             for (const {version, versionData } of createDexIterator(_ctx.dexes)) {
                 const factoryContract = versionData.contract;
                 if (factoryContract) {
-                    let price: BigNumber = BigNumber(0)
                     let new_pool_data: PoolData = versionData.pools?.[tokens_id];
-
                     if (new_pool_data) {
                         if (version == "v3" && new_pool_data) {
                             
-                            const slot0 = await versionData.pools[tokens_id].contract.slot0();
-                            price = BigNumber(
-                                decodeSqrtPriceX96Big(slot0[0] as bigint, GetAdrressesByUniqueId(tokens_id).map(token_id => _ctx.tokens[token_id])
-                                )
-                            )
-                            
-                            const volume = await versionData.pools[tokens_id].contract.liquidity();
-                            new_pool_data.price = price;
-                            new_pool_data.volume = volume.toString()
+                            const pool_contact = versionData.pools[tokens_id].contract;
+                            new_pool_data = await UpdateV3Data(pool_contact,new_pool_data)
                             // Use the observe method to get historical data
                         }
                         else
                         {
-                            const reserves: [bigint,bigint] = await versionData.pools[tokens_id].contract.getReserves();
-                            price = decodeSimplePrice(reserves,GetAdrressesByUniqueId(tokens_id).map(token_id => _ctx.tokens[token_id]))
-                            new_pool_data.volume = BigNumber((reserves[1] + reserves[0]).toString());
-                            }
-                        new_pool_data.price = price
+                            const pool_contact = versionData.pools[tokens_id].contract;
+                            new_pool_data = await UpdateV2Data(pool_contact,new_pool_data)
+                            
+                        }
+                    
                         _poolData.push(new_pool_data)
-                    }
-                }
-            }
+                    }}}
             return _poolData;
         }
 

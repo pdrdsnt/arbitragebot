@@ -1,19 +1,18 @@
-import { PoolData, TokenData} from "./types";
+import { PoolData, TokenData } from "./types";
 import { BigNumber } from "bignumber.js"
 import { ctx } from './App';
 import { useContext } from "react";
+import { ethers } from "ethers";
+import Decimal from "decimal.js";
 
 export function GetAdrressesByUniqueId(name: string): Array<string> {
     return name.split("-");
 }
-
 export function GetNamesByUniqueId(name: string, div: string = ""): Array<string> {
     const arr: Array<string> = name.split("-").map((s) => useContext(ctx).tokens[s].name);
     arr[0] += div;
     return arr;
 }
-
-
 export function selectItemInList(pairId: string, list: Array<string>): Array<string> {
     if (list.includes(pairId)) {
         return list.filter(pair => pair != pairId)
@@ -21,13 +20,10 @@ export function selectItemInList(pairId: string, list: Array<string>): Array<str
         return [...list, pairId]
     }
 }
-
-
 export function PairUniqueId(addr0: string, addr1: string): string {
     const sortedTokens = [addr0, addr1].sort();
     return sortedTokens.join("-");
 }
-
 export function GetAllPairs(tokens: Array<string>): Array<string> {
     let pairs = [];
     const total_tokens = tokens.length;
@@ -38,36 +34,85 @@ export function GetAllPairs(tokens: Array<string>): Array<string> {
             pairs.push(PairUniqueId(pair[0], pair[1]));
         }
     }
-
     return pairs;
 }
+export async function UpdateV3Data(poolContract: ethers.Contract,pool_data: PoolData): Promise<PoolData> {
+    const tokens: Array<TokenData> = [pool_data.token0,pool_data.token1]
+    const slot0 = await poolContract.slot0();
+    
+    const price = BigNumber(
+        decodeSqrtPriceX96Big(slot0[0] as bigint, tokens)
+        )
+    
+    const volume = await poolContract.liquidity();
+    pool_data.price = price;
+    pool_data.volume = volume.toString()
 
-export function decodeSimplePrice(reserves: bigint[],tokens: Array<TokenData>) : BigNumber{
-
-    const reserve0 = new BigNumber(reserves[0].toString());
-    const reserve1 = new BigNumber(reserves[1].toString());
-    const priceBigNumber = reserve1.div(reserve0);
-    const decimals_diff = tokens[0].decimals - tokens[1].decimals;
-    const decimals_scale = BigNumber(10).pow(decimals_diff);
-    const adjustedPrice = priceBigNumber.multipliedBy(decimals_scale);
-
-    const roundedPrice = adjustedPrice.decimalPlaces(18); // Adjust to desired precision (e.g., 8 decimals)
-    return roundedPrice;
-
+    return pool_data;
 }
 
-export function decodeSqrtPriceX96Big(sqrtPriceX96: bigint, tokens: Array<TokenData>): BigNumber {
-    const decimals_diff = tokens[0].decimals - tokens[1].decimals;
-    const Q96 = BigNumber(2).pow(96); // 2^96
+export async function UpdateV2Data(poolContract: ethers.Contract,pool_data: PoolData): Promise<PoolData> {
+    
+    const reserves: [bigint, bigint] = await poolContract.getReserves();
+    const new_reserves = [reserves[0] + 1n, reserves[1] - 1n]
+    
+    const new_price = decodeSimplePrice(
+        new_reserves,
+        [pool_data.token0,pool_data.token1]
+    )
 
-    const sqrtPrice = new BigNumber(sqrtPriceX96.toString()).div(Q96.toString());
-    const price = sqrtPrice.pow(2);
+    const price = decodeSimplePrice(
+        reserves,
+        [pool_data.token0,pool_data.token1]
+    )
+
+    pool_data.volume = BigNumber((reserves[1] + reserves[0]).toString());
+    pool_data.price = price
+    const price_impact_big_number = BigNumber(price).minus(new_price)
+    pool_data.price_impact = price_impact_big_number
+
+    return pool_data;
+}
+
+function decodeSimplePrice(
+    reserves: bigint[],
+    tokens: Array<TokenData>
+): BigNumber {
+
+    const decimals = tokens.map((r) => r.decimals)
+
+    if (reserves.length < 2) throw new Error("Insufficient reserves provided.");
+    if (!decimals[0] || !decimals[1])
+        throw new Error("Invalid token decimals provided.");
+  
+    const reserve0 = new BigNumber(reserves[0].toString());
+    const reserve1 = new BigNumber(reserves[1].toString());
+
+    if (reserve0.isZero()) throw new Error("Division by zero in reserves.");
+
+    const priceBigNumber = reserve1.div(reserve0);
+    const decimals_diff = decimals[0] - decimals[1];
     const decimals_scale = new BigNumber(10).pow(decimals_diff);
-    // Final price with decimals adjustment
-    const adjustedPrice = price.multipliedBy(decimals_scale);
+    const adjustedPrice = priceBigNumber.multipliedBy(decimals_scale);
 
-    const roundedPrice = adjustedPrice.decimalPlaces(18); // Adjust to desired precision (e.g., 8 decimals)
-    return roundedPrice;
+    return adjustedPrice.decimalPlaces(18); // Adjust to desired precision
+}
+
+function decodeSqrtPriceX96Big(
+    sqrtPriceX96: bigint,
+    tokens: Array<TokenData>
+): BigNumber {
+    if (!tokens[0].decimals || !tokens[1].decimals)
+        throw new Error("Invalid token decimals provided.");
+
+    const Q96 = new BigNumber(2).pow(96);
+    const sqrtPrice = new BigNumber(sqrtPriceX96.toString()).div(Q96);
+
+    const price = sqrtPrice.pow(2);
+    const decimals_diff = tokens[0].decimals - tokens[1].decimals;
+    const decimals_scale = new BigNumber(10).pow(decimals_diff);
+
+    return price.multipliedBy(decimals_scale).decimalPlaces(18); // Adjust to desired precision
 }
 /*
 export async function getNearestInitializedTicks(poolData: PoolData) {
@@ -103,7 +148,7 @@ export async function getNearestInitializedTicks(poolData: PoolData) {
     }
 }
 */
-export async function getTickData(poolData: PoolData,currentTick: number) {
+export async function getTickData(poolData: PoolData, currentTick: number) {
     const wordPosition = Math.floor(currentTick / 256);  // Which bitmap word contains the tick
     const bitPosition = currentTick % 256;  // Which bit represents the tick in that word
 

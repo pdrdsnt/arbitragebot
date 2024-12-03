@@ -73,7 +73,7 @@ function App() {
   return (
     <>
       <div className="title-bar" key={"title_bar"}>
-        <div className="title-in-bar">Defi Pool Monitor</div>
+        <div className="title-in-bar">💀</div>
         <TokenSelector handleTokenSelect={selectToken} selectedTokens={selectedTokens} />
         <WalletButton />
       </div>

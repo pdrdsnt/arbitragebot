@@ -1,11 +1,10 @@
 import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
-
+import Decimal from "decimal.js";
 
 export type Chain = {
     bsc : ChainData;
 };
-
 
 export type ChainData = {
     dexes: Exchanges;
@@ -13,6 +12,7 @@ export type ChainData = {
     abis: any;
     providers: Array<ethers.WebSocketProvider>
     signers: Array<ethers.JsonRpcSigner>
+    wallets: Array<ethers.BrowserProvider>
 };
 
 export type Tokens = {
@@ -33,6 +33,7 @@ export type TokenData = {
     icon: string | null;
     decimals: number;
     contract: ethers.Contract | null;
+    address: string;
 }
 
 export type ExchangeVersion = {
@@ -46,26 +47,34 @@ export type Pools = {
 };
 
 export class PoolData {
+    tokens_id: string;
     contract: ethers.Contract;
     dex: string;
     version: string;
     address: string;
-    token0: string;
-    token1: string;
+    token0: TokenData;
+    token1: TokenData;
     volume: BigNumber
     price: BigNumber;
     fee: number;
+    decimals: Array<number>;
+    price_impact: BigNumber;
     constructor(
+        tokens_id: string,
         contract: ethers.Contract,
         dex: string,
         version: string,
         address: string,
-        token0: string,
-        token1: string,
+        token0: TokenData,
+        token1: TokenData,
+        decimals: Array<number>,
         volume = BigNumber(0),
         price = BigNumber(0),
-        fee = 500,
+        fee = 0.03,
+        price_impact = BigNumber(0),
+        
     ){
+        this.tokens_id = tokens_id;
         this.contract = contract;
         this.dex = dex;
         this.version = version;
@@ -75,18 +84,8 @@ export class PoolData {
         this.volume = volume;
         this.price = price;
         this.fee = fee;
+        this.decimals = decimals;
+        this.price_impact = price_impact;
     }
 
 };
-
-export class PairPath {
-    dex: string;
-    version: string;
-    id: string;
-
-    constructor(dex: string, version: string, id: string) {
-        this.dex = dex;
-        this.version = version;
-        this.id = id;
-    }
-}

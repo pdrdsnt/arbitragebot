@@ -4,6 +4,7 @@
     "tokens": {},
     "abis": {},
     "providers": [],
-    "signers": []
+    "signers": [],
+    "wallets": []
   }
 }
