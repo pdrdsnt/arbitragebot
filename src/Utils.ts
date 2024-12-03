@@ -3,7 +3,6 @@ import { BigNumber } from "bignumber.js"
 import { ctx } from './App';
 import { useContext } from "react";
 import { ethers } from "ethers";
-import Decimal from "decimal.js";
 
 export function GetAdrressesByUniqueId(name: string): Array<string> {
     return name.split("-");
@@ -66,10 +65,14 @@ export async function UpdateV2Data(poolContract: ethers.Contract,pool_data: Pool
         [pool_data.token0,pool_data.token1]
     )
 
+    console.log("price" + price.toString())
+    console.log("nprice" + new_price.toString())
+    const price_impact_big_number = price.minus(new_price)
+    console.log("dddddddddddd" + price_impact_big_number.toString())
+    pool_data.price_impact = price_impact_big_number
+
     pool_data.volume = BigNumber((reserves[1] + reserves[0]).toString());
     pool_data.price = price
-    const price_impact_big_number = BigNumber(price).minus(new_price)
-    pool_data.price_impact = price_impact_big_number
 
     return pool_data;
 }
