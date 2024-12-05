@@ -1,7 +1,6 @@
 
 import { useContext, useState, useEffect, useRef, Dispatch, SetStateAction } from "react";
 import { ctx } from "./App";
-import { BigNumber } from "bignumber.js"
 import {PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
 import { ethers } from "ethers";
 import {GetNamesByUniqueId, PairUniqueId, UpdateV2Data, UpdateV3Data } from "./Utils";

@@ -1,8 +1,8 @@
 import { useContext} from "react";
 import { PoolData } from "./types";
 import { ctx } from "./App";
-import Decimal from "decimal.js";
-export default function PoolsSeeker({ pools }: { pools: Array<PoolData> }) {
+
+export default function PoolsSeeker({ pools }:{ pools: Array<PoolData> }) {
     if (pools.length == 0) return;
     const poolsbyTokens: Record<string, Array<PoolData>> = {}
     pools.forEach((x) => {
@@ -33,7 +33,6 @@ export default function PoolsSeeker({ pools }: { pools: Array<PoolData> }) {
                                     <div className="pool-data-data-container" key={"priceview"}>
                                         <div className="pool-data-property-title">1 {_ctx.tokens[p.token0.address].name}: </div>
                                         <div className="pool-data-dex-data">{p.price.toString()}</div>
-                                        <div className="pool-data-dex-data">{new Decimal(p.price_impact.toString()).toString()}</div>
                                     </div>
                                 </div>
                             </div>

@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
-import Decimal from "decimal.js";
+
 
 export type Chain = {
     bsc : ChainData;
@@ -46,6 +46,41 @@ export type Pools = {
     [key: string]: PoolData
 };
 
+
+export class Trade{
+    
+    token0: boolean;
+    poolData: PoolData;
+    amount: number
+    price_impact: BigNumber = BigNumber(0)
+
+    constructor(
+        poolData: PoolData,
+        token0 = true,
+        amount = 1
+    ){
+        this.amount = amount
+        this.token0 = token0
+        this.poolData = poolData
+    }
+};
+
+export class PoolPath {
+    chain_id: number;
+    dex: string;
+    version: string;
+    constructor(
+        chain_id = 56,
+        dex = "uniswap",
+        version = "v2",
+    ){
+        this.chain_id = chain_id
+        this.dex = dex
+        this.version = version
+    }
+}
+
+
 export class PoolData {
     tokens_id: string;
     contract: ethers.Contract;
@@ -58,7 +93,6 @@ export class PoolData {
     price: BigNumber;
     fee: number;
     decimals: Array<number>;
-    price_impact: BigNumber;
     constructor(
         tokens_id: string,
         contract: ethers.Contract,
@@ -70,9 +104,7 @@ export class PoolData {
         decimals: Array<number>,
         volume = BigNumber(0),
         price = BigNumber(0),
-        fee = 0.03,
-        price_impact = BigNumber(0),
-        
+        fee = 0.03,        
     ){
         this.tokens_id = tokens_id;
         this.contract = contract;
@@ -85,7 +117,6 @@ export class PoolData {
         this.price = price;
         this.fee = fee;
         this.decimals = decimals;
-        this.price_impact = price_impact;
     }
 
 };
