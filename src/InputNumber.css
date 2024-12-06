@@ -1,0 +1,22 @@
+.input-number {
+    width: 100%; /* Full width, or adjust as needed */
+    max-width: 200px; /* Limit max width */
+    padding: 10px;
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 5px; /* Rounded corners */
+    text-align: center; /* Center the text */
+    font-size: 16px; /* Increase font size for readability */
+    outline: none; /* Remove outline on focus */
+    appearance: none; /* Remove spinner buttons in some browsers */
+}
+
+.input-number:focus {
+    border-color: #007bff; /* Highlight border color on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add subtle glow */
+}
+
+.input-number::-webkit-inner-spin-button, 
+.input-number::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Remove spinner buttons in WebKit browsers */
+    margin: 0; /* Remove default margin */
+}

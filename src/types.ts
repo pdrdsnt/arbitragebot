@@ -46,6 +46,10 @@ export type Pools = {
     [key: string]: PoolData
 };
 
+export class TradeRoute{
+    trades: Array<Trade> = []
+    margin: Number = 0
+}
 
 export class Trade{
     
@@ -53,6 +57,7 @@ export class Trade{
     poolData: PoolData;
     amount: number
     price_impact: BigNumber = BigNumber(0)
+    fee: number = 0
 
     constructor(
         poolData: PoolData,

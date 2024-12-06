@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, } from "react";
+import { createContext, useState, useContext, useEffect, useMemo, } from "react";
 import { ethers } from "ethers";
 import chainsStructure from "./assets/chain_data.json";
 import bscDexes from "./assets/bsc/dexes.json";
@@ -10,6 +10,7 @@ import { ChainData, Exchanges, PoolData, Tokens } from "./types";
 import * as Utils from './Utils';
 import WalletButton from "./WalletButton";
 import TokenSelector from "./TokenSelector";
+import Arbitro from "./Arbitro";
 
 function CurrentChainData(chain: keyof typeof chainsStructure): ChainData {
   const data = chainsStructure[chain] as ChainData;
@@ -58,20 +59,50 @@ function App() {
 
   useEffect(() => {
     setSelectedPairs(Utils.GetAllPairs(selectedTokens))
+    return () => {
+      console.log("updating")
+      
+      for (const poolContainerID of Object.keys(poolsByComponent)) {
+        console.log(typeof(poolContainerID))
+        if (!selectedPairs.includes(poolContainerID)) {
+          removePoolsFromPoolsContainer(poolContainerID)
+        }
+      }
+    }
   }, [selectedTokens])
 
-  const [_, setPools] = useState<Array<PoolData>>([]);
+  const [poolsByComponent, setPoolsByComponent] = useState<Record<string, Array<PoolData>>>({})
+  const allPools = useMemo(() => {
+    return Object.values(poolsByComponent).flat();
+  }, [poolsByComponent]);
+
+  const handleSetPools = (pools: Array<PoolData>, component_id: string) => {
+
+    const existingPools = poolsByComponent[component_id] || [];
+    const uniquePools = pools.filter((x) => !allPools.includes(x));
+    const updatedPools = {
+      ...poolsByComponent,
+      [component_id]: existingPools.concat(uniquePools),
+    };
+
+    setPoolsByComponent(updatedPools); // Update state with a new object
+  };
+  const removePoolsFromPoolsContainer = (id: string) => {
+    const { [id]: _, ...updatedPools } = poolsByComponent;
+    setPoolsByComponent(updatedPools);
+  };
 
   const selectToken = (tkn: string) => {
-    if(!selectedTokens.includes(tkn)){
-      setSelectedTokens([...selectedTokens,tkn])
-    }else{
+    if (!selectedTokens.includes(tkn)) {
+      setSelectedTokens([...selectedTokens, tkn])
+    } else {
       setSelectedTokens(selectedTokens.filter((x) => x != tkn))
     }
   }
 
   return (
     <>
+
       <div className="title-bar" key={"title_bar"}>
         <div className="title-in-bar">💀</div>
         <TokenSelector handleTokenSelect={selectToken} selectedTokens={selectedTokens} />
@@ -81,18 +112,18 @@ function App() {
         <ctx.Provider value={_ctx}>
           <div className="cards-view" key={"cardsview"}>
             {selectedPairs.map((pair) => (
-              <>
-                <div className={"pool-card"} key={pair}>
-                  <PoolPairView
-                    tokens_addr={Utils.GetAdrressesByUniqueId(pair)}
-                    _pools={setPools} />
-                </div>
-              </>
+              <div className={"pool-card"} key={pair}>
+                <PoolPairView
+                  tokens_addr={Utils.GetAdrressesByUniqueId(pair)}
+                  handlePools={handleSetPools}
+                />
+              </div>
             ))}
-
           </div>
+          <Arbitro pools={allPools} />
         </ctx.Provider>
       </div >
+      <div className="empty-space" />
     </>
   )
 }

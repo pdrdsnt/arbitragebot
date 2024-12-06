@@ -2,7 +2,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem; /* Reduced padding */
   text-align: center;
 }
 
@@ -10,29 +10,29 @@
 .cards-view {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 10px; /* Reduced gap */
   width: 90%;
-  margin: 2em auto 2em auto; /* Consistent spacing */
+  margin: 1em auto; /* Reduced margin */
   background-color: rgba(137, 43, 226, 0.03);
 }
 
 /* Token Title Bar */
 .token-title-bar {
   display: flex;
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 1em;
-  margin-bottom: 2em;
+  padding: 0.5em; /* Reduced padding */
+  margin-bottom: 1em; /* Reduced margin */
   background-color: #000;
 }
 
 /* Token Container */
 .token-container {
-  display: flex;
-  flex-wrap: wrap; /* Ensures layout adapts to smaller screens */
+  display: flexbox;
+  flex-wrap: wrap;
   align-items: center;
-  margin-left: 1em;
+  margin-left: 0.5em; /* Reduced margin */
 }
 
 /* Tokens Names */
@@ -44,8 +44,8 @@
 /* Pool Card */
 .pool-card {
   background-color: rgb(36, 13, 13);
-  padding: 1em;
-  border-radius: 4px; /* Slightly rounded corners for better aesthetics */
+  padding: 0.5em; /* Reduced padding */
+  border-radius: 4px;
   transition: filter 300ms ease-in-out;
 }
 
@@ -55,7 +55,7 @@
 
 /* Pool Data */
 .pool-data {
-  padding: 1em;
+  padding: 0.5em; /* Reduced padding */
   background-color: rgb(26, 8, 48);
   border-radius: 4px;
   transition: background-color 300ms ease-in-out;
@@ -67,10 +67,10 @@
 
 .pool-data-element {
   font-size: 0.9rem;
-  padding: 0.5em;
+  padding: 0.3em; /* Reduced padding */
   background-color: rgb(129, 34, 34);
   border-radius: 4px;
-  margin-bottom: 0.5em;
+  margin-bottom: 0.3em; /* Reduced margin */
 }
 
 /* Pool Data Titles */
@@ -81,7 +81,7 @@
 
 .pool-data-property-title {
   text-align: left;
-  font-size: 0.6rem; /* Slightly increased for readability */
+  font-size: 0.6rem;
 }
 
 .pool-data-property-result {
@@ -93,23 +93,22 @@
   text-align: left;
   font-size: 1em;
 }
-.title-bar{
+
+.title-bar {
   display: flex;
   background-color: #000;
-  align-items: start;
-  border-radius: 0;
   align-items: center;
   justify-content: space-between;
-  justify-self: auto;
 }
 
-.title-in-bar{
+.title-in-bar {
   color: #d82e2e;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   font-size: xx-large;
   margin-left: 0.2em;
-  padding-top: 0.2em;
+  padding-top: 0.1em; /* Reduced padding */
 }
+
 /* Mini Title Bar */
 .mini-title-bar {
   display: flex;
@@ -125,49 +124,69 @@
 /* Pool Data Container */
 .pool-data-container {
   display: flex;
-  flex-wrap: wrap; /* Allows stacking on smaller screens */
-  gap: 1em;
+  flex-wrap: wrap;
+  gap: 0.5em; /* Reduced gap */
 }
 
 /* Pool Address */
 .address {
-  font-size: .75rem;
+  font-size: 0.75rem;
   font-stretch: extra-condensed;
 }
 
 /* Pair Name */
 .pair-name {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.3em; /* Reduced margin */
   font-weight: bold;
 }
 
 /* Main View */
 .main-view {
   display: flex;
-  flex-wrap: wrap; /* Adjust layout for smaller screens */
+  flex-wrap: wrap;
   justify-content: center;
-  margin-top: 2em;
+  margin-top: 1em; /* Reduced margin */
 }
 
 /* Specific Responsiveness */
 @media (max-width: 768px) {
   .cards-view {
     width: 95%;
-    gap: 15px;
+    gap: 8px; /* Reduced gap */
   }
 
   .pool-data-container {
-    flex-direction: column; /* Stack elements */
-    gap: 1em;
+    flex-direction: column;
+    gap: 0.5em; /* Reduced gap */
   }
 
   .pool-data-element {
-    font-size: 0.8rem; /* Adjust font size for smaller screens */
+    font-size: 0.8rem;
   }
 
   .token-title-bar {
-    flex-direction: column; /* Align in a column */
-    padding: 0.5em;
-    gap: 1em;
+    flex-direction: column;
+    padding: 0.3em; /* Reduced padding */
+    gap: 0.5em; /* Reduced gap */
   }
+}
+
+.empty-space {
+  height: 50px; /* Reduced height */
+}
+
+.floating-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  margin-bottom: 10px;
+  height: 5em; /* Reduced height */
+  background-color: rgba(118, 7, 7, 0.9);
+  color: white;
+  text-align: center;
+  padding: 20px 2px; /* Reduced padding */
+  z-index: 100;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+  display: flex;
 }
