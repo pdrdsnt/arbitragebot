@@ -39,6 +39,8 @@ const providers = providers_adresses.map((p) => new ethers.WebSocketProvider(p))
 function App() {
   const [selectedTokens, setSelectedTokens] = useState<Array<string>>([])
   const [selectedPairs, setSelectedPairs] = useState<Array<string>>([])
+  const [mountedPoolsContainers, setMountedPoolContainers] = useState(new Set())
+  const [poolsByComponent, setPoolsByComponent] = useState<Record<string, Array<PoolData>>>({})
   const _ctx = useContext(ctx);
 
   _ctx.providers = providers;
@@ -56,42 +58,50 @@ function App() {
       }
     }
   }
-
   useEffect(() => {
     setSelectedPairs(Utils.GetAllPairs(selectedTokens))
-    return () => {
-      console.log("updating")
-      
-      for (const poolContainerID of Object.keys(poolsByComponent)) {
-        console.log(typeof(poolContainerID))
-        if (!selectedPairs.includes(poolContainerID)) {
-          removePoolsFromPoolsContainer(poolContainerID)
-        }
-      }
-    }
-  }, [selectedTokens])
 
-  const [poolsByComponent, setPoolsByComponent] = useState<Record<string, Array<PoolData>>>({})
+  }, [selectedTokens])
+  useEffect(() => {
+    const invalidPairs = Object.keys(poolsByComponent).filter(
+      (component_ids) => !selectedPairs.includes(component_ids)
+    );
+
+    invalidPairs.forEach((component_ids) => handleSetPools([], component_ids));
+  }, [selectedPairs]);
   const allPools = useMemo(() => {
     return Object.values(poolsByComponent).flat();
+
   }, [poolsByComponent]);
-
+  const handleMountedComponents = (component_id: string, isMounted: boolean) => {
+    setMountedPoolContainers((prevSet) => {
+      const updatedSet = new Set(prevSet); // Create a new Set based on the previous state
+      if (isMounted) {
+        updatedSet.add(component_id); // Add the component ID if it's mounted
+      } else {
+        updatedSet.delete(component_id); // Remove the component ID if it's unmounted
+      }
+      return updatedSet; // Return the new Set to update the state
+    });
+  }
   const handleSetPools = (pools: Array<PoolData>, component_id: string) => {
-
-    const existingPools = poolsByComponent[component_id] || [];
-    const uniquePools = pools.filter((x) => !allPools.includes(x));
-    const updatedPools = {
-      ...poolsByComponent,
-      [component_id]: existingPools.concat(uniquePools),
-    };
-
-    setPoolsByComponent(updatedPools); // Update state with a new object
+    console.log("updating pools in parent")
+    if(!mountedPoolsContainers.has(component_id)){
+      console.log("called by unmonted component")
+      return
+    }
+    setPoolsByComponent((prev) => {
+      const updatedPools = { ...prev };
+      if (pools.length === 0) {
+        // Remove key if no pools
+        delete updatedPools[component_id];
+      } else {
+        // Update pools for the given component
+        updatedPools[component_id] = pools;
+      }
+      return updatedPools; // Return a new object reference
+    });
   };
-  const removePoolsFromPoolsContainer = (id: string) => {
-    const { [id]: _, ...updatedPools } = poolsByComponent;
-    setPoolsByComponent(updatedPools);
-  };
-
   const selectToken = (tkn: string) => {
     if (!selectedTokens.includes(tkn)) {
       setSelectedTokens([...selectedTokens, tkn])
@@ -116,6 +126,7 @@ function App() {
                 <PoolPairView
                   tokens_addr={Utils.GetAdrressesByUniqueId(pair)}
                   handlePools={handleSetPools}
+                  setIsMounted={handleMountedComponents}
                 />
               </div>
             ))}

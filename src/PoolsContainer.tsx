@@ -1,11 +1,11 @@
 
-import { useContext, useState, useEffect, useRef, Dispatch, SetStateAction } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { ctx } from "./App";
-import {PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
-import { ethers } from "ethers";
-import {GetNamesByUniqueId, PairUniqueId, UpdateV2Data, UpdateV3Data } from "./Utils";
+import { PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
+import { ethers, id } from "ethers";
+import { GetNamesByUniqueId, PairUniqueId, UpdateV2Data, UpdateV3Data } from "./Utils";
 import PoolsSeeker from "./PoolsSeeker";
-export default function PoolsContainer({ tokens_addr,handlePools }: { tokens_addr: Array<string> , handlePools: CallableFunction}) {
+export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted }: { tokens_addr: Array<string>, handlePools: CallableFunction, setIsMounted: CallableFunction }) {
 
     const _ctx: ChainData = useContext(ctx);
     const [trigger, setTrigger] = useState(false)
@@ -29,6 +29,8 @@ export default function PoolsContainer({ tokens_addr,handlePools }: { tokens_add
     }
     //initialization, creating poolData objects
     useEffect(() => {
+        setIsMounted(tokens_id, true)
+        isMounted.current = true
         const _poolsData: Array<PoolData> = []
         async function initializeContracts() {
             for (const { dex, version, versionData } of createDexIterator(_ctx.dexes)) {
@@ -79,58 +81,89 @@ export default function PoolsContainer({ tokens_addr,handlePools }: { tokens_add
         }
         initializeContracts();
         ready.current = true;
-        
-    }, [])
 
+        return () => {
+            handlePools([], tokens_id);
+            setIsMounted(tokens_id, false)
+            ready.current = false;
+            isMounted.current = false;
+        }
+
+    }, [])
     //update values of the Array<poolData> created 
+
+    const [latestData, setLatestData] = useState<PoolData[] | null>(null)
+    const currentPoolRequest = useRef(0)
+
     useEffect(() => {
         if (!ready.current) return;
+        if (!isMounted.current) return;
+        currentPoolRequest.current += 1;
+        const controller = new AbortController();
+        const signal = controller.signal;
 
-        async function UpdatePoolsData() 
-        {
+        const activePromises = useRef<{
+            [id: number]: AbortController;
+        }>({});
+
+        async function UpdatePoolsData() {
             let _poolData: Array<PoolData> = [];
-            for (const {version, versionData } of createDexIterator(_ctx.dexes)) {
+            for (const { version, versionData } of createDexIterator(_ctx.dexes)) {
                 const factoryContract = versionData.contract;
                 if (factoryContract) {
                     let new_pool_data: PoolData = versionData.pools?.[tokens_id];
                     if (new_pool_data) {
                         if (version == "v3" && new_pool_data) {
                             const pool_contact = versionData.pools[tokens_id].contract;
-                            new_pool_data = await UpdateV3Data(pool_contact,new_pool_data)
+                            new_pool_data = await UpdateV3Data(pool_contact, new_pool_data)
                         }
-                        else
-                        {
+                        else {
                             const pool_contact = versionData.pools[tokens_id].contract;
-                            new_pool_data = await UpdateV2Data(pool_contact,new_pool_data)
-                            
+                            new_pool_data = await UpdateV2Data(pool_contact, new_pool_data)
+
                         }
-                    
+
                         _poolData.push(new_pool_data)
-                    }}}
+                    }
+                }
+            }
             return _poolData;
         }
 
         async function UpdateStates() {
-            const _poolsData = await UpdatePoolsData();
-
-            if (!isMounted) return;
-            setPoolsData(_poolsData)
-            handlePools(_poolsData,tokens_id);
+            try {
+                const pd = await UpdatePoolsData();
+                if (!signal.aborted && isMounted.current) {
+                    setPoolsData(pd);
+                    handlePools(pd, tokens_id);
+                }
+            } catch (error) {
+                console.error(`Error in UpdateStates: ${error}`);
+            }
         }
 
         UpdateStates();
-
         return () => {
-            isMounted.current = false;
-        
-        };
+            controller.abort();
+        }
     }, [trigger])
+
+    useEffect(() => {
+        async function UpdateStates() {
+            if (isMounted.current && latestData) {
+                setPoolsData(latestData);
+                handlePools(latestData, tokens_id);
+            }
+        }
+        UpdateStates();
+    }, [latestData])
 
     //update trigger
     useEffect(() => {
-        // Set an interval to update the trigger every 0.5 seconds
         const interval = setInterval(() => {
-            setTrigger((prev) => !prev); // Toggle the trigger value
+            if (isMounted.current) {
+                setTrigger((prev) => !prev); // Trigger updates
+            }
         }, 1000);
 
         // Cleanup the interval when the component unmounts
@@ -142,19 +175,19 @@ export default function PoolsContainer({ tokens_addr,handlePools }: { tokens_add
             <div className="token-title-bar">
                 <div className="tokens-names-in-card" key={tokens_id + "0"}>
                     {GetNamesByUniqueId(tokens_id, " /").map((p) => (
-                            <h4 className="token" key={p}> {p} </h4>
+                        <h4 className="token" key={p}> {p} </h4>
                     ))}
                 </div>
                 <div className="tokens-names-in-card" key={tokens_id + "1"}>
                     {tokens_addr.map((p) => (
-                            <h4 className="pool-address" key={p + "in title"}> {p} </h4>
+                        <h4 className="pool-address" key={p + "in title"}> {p} </h4>
                     ))}
                 </div>
             </div>
             <ul className="pools-data-view">
-                <PoolsSeeker pools={poolsData}/>
+                <PoolsSeeker pools={poolsData} />
             </ul>
-           
+
         </>
     );
 }
