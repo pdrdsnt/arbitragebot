@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
+import { PromiseState } from "./PromiseState";
 
 
 export type Chain = {
@@ -125,3 +126,8 @@ export class PoolData {
     }
 
 };
+
+export type RequestsStream<T> = {
+    promiseStateArray: PromiseState<T>[]; 
+    currentPoolRequest: number;
+}
