@@ -49,7 +49,7 @@ export type Pools = {
 
 export class TradeRoute{
     routes: Array<TradeRoute> = []
-    trade?: Trade;
+    trade?: Trade; //it stores the trade with parent
 }
 
 export class Trade{
