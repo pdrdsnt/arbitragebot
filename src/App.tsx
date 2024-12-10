@@ -131,7 +131,6 @@ function App() {
               </div>
             ))}
           </div>
-          <Arbitro pools={allPools} />
         </ctx.Provider>
       </div >
       <div className="empty-space" />

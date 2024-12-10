@@ -40,6 +40,7 @@ export default function Pool( {poolData, sendLastData} : {poolData: PoolData, se
                 r.getState()
                 if(r.done && r.result){
                     setLatestData(r.result)
+                    console.log("updated: " + r.result.dex + " version: " + r.result.version)
                 }
             }
         }
@@ -53,19 +54,23 @@ export default function Pool( {poolData, sendLastData} : {poolData: PoolData, se
     useEffect(() => {
         const interval = setInterval(() => {    
             setTrigger((prev) => !prev); // Trigger updates
-        }, 1000);
+        }, 2000);
 
         // Cleanup the interval when the component unmounts
         return () => clearInterval(interval);
     }); // Empty dependency array ensures this runs only once
 
     return (
-        <>
+        <div className="pool-card">
             <ul className="tokens-names-in-card" key={tokens_id + "1"}>
-                <li>{latestData?.address.toString()}</li>
-                <li>{latestData?.price.toString()}</li>
+                <li className="address">{latestData?.address.toString()}</li>
+                <li>{latestData?.dex + " version: " + latestData?.version + " " + latestData?.fee}</li>
+                <li className="pool-data-property-result">
+                    {<div className="pool-data-property-result">{latestData?.price.toString()}</div>}
+                    {<div>{latestData?.volume.toString()}</div>}
+                </li>
             </ul>
-        </>
+        </div>
     )
 
 }

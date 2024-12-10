@@ -30,7 +30,7 @@
 /* Token Container */
 .token-container {
   display: flexbox;
-  flex-wrap: wrap;
+  flex-wrap: wrap-reverse;
   align-items: center;
   margin-left: 0.5em; /* Reduced margin */
 }
@@ -39,11 +39,12 @@
 .tokens-names-in-card {
   display: flexbox;
   font-size: 50%;
+  background-color: #2e0e0e09;
 }
 
 /* Pool Card */
 .pool-card {
-  background-color: rgb(36, 13, 13);
+  background-color: rgb(5, 1, 1);
   padding: 0.5em; /* Reduced padding */
   border-radius: 4px;
   transition: filter 300ms ease-in-out;
@@ -83,12 +84,13 @@
   text-align: left;
   font-size: 0.6rem;
 }
-
 .pool-data-property-result {
-  text-align: left;
-  font-size: 1.2em;
+  display: flex;
+  justify-content: space-between; /* Push items to opposite sides */
+  align-items: center; /* Align items vertically if needed */
+  font-size: 1.0em;
+  text-align: justify;
 }
-
 .pool-data-dex-data {
   text-align: left;
   font-size: 1em;
@@ -123,14 +125,14 @@
 
 /* Pool Data Container */
 .pool-data-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em; /* Reduced gap */
+  display: grid;
+  grid-template-columns: 1fr; /* Uma única coluna */
+  gap: .5em;
 }
 
 /* Pool Address */
 .address {
-  font-size: 0.75rem;
+  font-size: 0.25rem;
   font-stretch: extra-condensed;
 }
 
@@ -151,8 +153,8 @@
 /* Specific Responsiveness */
 @media (max-width: 768px) {
   .cards-view {
-    width: 95%;
-    gap: 8px; /* Reduced gap */
+    flex-direction: column;
+    gap: 0.5em; /* Reduced gap */
   }
 
   .pool-data-container {
@@ -172,21 +174,19 @@
 }
 
 .empty-space {
-  height: 50px; /* Reduced height */
+  height: 50em; /* Reduced height */
 }
 
 .floating-bar {
-  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   margin-bottom: 10px;
   height: 5em; /* Reduced height */
-  background-color: rgba(118, 7, 7, 0.9);
-  color: white;
+  background-color: rgba(149, 206, 152, 0.945);
+  color: rgb(0, 0, 0);
   text-align: center;
   padding: 20px 2px; /* Reduced padding */
-  z-index: 100;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
   display: flex;
 }

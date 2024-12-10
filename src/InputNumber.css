@@ -1,18 +1,18 @@
 .input-number {
-    width: 100%; /* Full width, or adjust as needed */
+    width: 40%; /* Full width, or adjust as needed */
     max-width: 200px; /* Limit max width */
     padding: 10px;
-    border: 1px solid #ccc; /* Subtle border */
-    border-radius: 5px; /* Rounded corners */
+    border: 0.1px solid #350303; /* Subtle border */
     text-align: center; /* Center the text */
-    font-size: 16px; /* Increase font size for readability */
+    font-size: 8px; /* Increase font size for readability */
     outline: none; /* Remove outline on focus */
     appearance: none; /* Remove spinner buttons in some browsers */
 }
 
 .input-number:focus {
-    border-color: #007bff; /* Highlight border color on focus */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add subtle glow */
+
+    border-color: #81071c; /* Highlight border color on focus */
+    box-shadow: 0 0 5px rgba(90, 5, 27, 0.5); /* Add subtle glow */
 }
 
 .input-number::-webkit-inner-spin-button, 

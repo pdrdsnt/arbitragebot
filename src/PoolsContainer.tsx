@@ -4,8 +4,8 @@ import { ctx } from "./App";
 import { PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
 import { ethers } from "ethers";
 import { GetNamesByUniqueId, PairUniqueId } from "./Utils";
-import PoolsSeeker from "./PoolsSeeker";
 import Pool from "./pool";
+import Arbitro from "./Arbitro";
 export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted }: { tokens_addr: Array<string>, handlePools: CallableFunction, setIsMounted: CallableFunction }) {
 
     const _ctx: ChainData = useContext(ctx);
@@ -42,46 +42,54 @@ export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted 
             for (const { dex, version, versionData } of createDexIterator(_ctx.dexes)) {
                 const factoryContract = versionData.contract;
                 let poolContract: any = null
+
                 if (factoryContract) {
                     let poolAddress: string = "";
-                    if (version == "v3") {
-                        try {
-                            poolAddress = await factoryContract.getPool(tokens_addr[0], tokens_addr[1], 500)
-                            poolContract = new ethers.Contract(poolAddress, _ctx.abis.V3_POOL_ABI, _ctx.providers[0]);
-                            //console.log(version)
-                        } catch (err) {
-                            console.log("cannot get pair address. Error= " + err)
+                    const fees: number[] = [100, 500, 1000, 2000,2500, 3000]; // List all fee tiers
+                    for (let f of fees) {
+                        if (version == "v3") {
+                            try {
+                                poolAddress = await factoryContract.getPool(tokens_addr[0], tokens_addr[1], Number(f))
+                                poolContract = new ethers.Contract(poolAddress, _ctx.abis.V3_POOL_ABI, _ctx.providers[0]);
+                                console.log(poolAddress)
+                            } catch (err) {
+                                console.log("cannot get pair address. Error= " + err)
+                                continue
+                            }
                         }
-                    }
-                    else if (version == "v2") {
-                        try {
-                            poolAddress = await factoryContract.getPair(tokens_addr[0], tokens_addr[1])
-                            poolContract = new ethers.Contract(poolAddress, _ctx.abis.V2_POOL_ABI, _ctx.providers[0]);
-                            //console.log(version)
-                        } catch (err) {
-                            console.log("cannot get pair address. Error= " + err)
+                        else if (version == "v2") {
+                            try {
+                                poolAddress = await factoryContract.getPair(tokens_addr[0], tokens_addr[1])
+                                poolContract = new ethers.Contract(poolAddress, _ctx.abis.V2_POOL_ABI, _ctx.providers[0]);
+                                f = 3000
+                                //console.log(version)
+                            } catch (err) {
+                                console.log("cannot get pair address. Error= " + err)
+                                continue
+                            }
                         }
-                    }
-                    if (poolAddress && poolAddress != "0x0000000000000000000000000000000000000000") {
-                        const pd: PoolData = new PoolData(
-                            tokens_id,
-                            poolContract,
-                            dex,
-                            version,
-                            poolAddress,
-                            _ctx.tokens[tokens_addr[0]],
-                            _ctx.tokens[tokens_addr[1]],
-                            []
-                        )
+                        if (poolAddress && poolAddress != "0x0000000000000000000000000000000000000000") {
+                            const pd: PoolData = new PoolData(
+                                tokens_id,
+                                poolContract,
+                                dex,
+                                version,
+                                poolAddress,
+                                _ctx.tokens[tokens_addr[0]],
+                                _ctx.tokens[tokens_addr[1]],
+                                Number(f),
+                                []
+                            )
 
-                        //updating context tree
-                        versionData.pools[tokens_id] = pd
+                            //updating context tree
+                            versionData.pools[tokens_id] = pd
 
-                        //updating local pools data for easier handling here
-                        setPoolData((prevPools) => ({
-                            ...prevPools, // Spread the existing poolsData
-                            [poolAddress]: pd, // Add or update the specific pool data
-                        }));
+                            //updating local pools data for easier handling here
+                            setPoolData((prevPools) => ({
+                                ...prevPools, // Spread the existing poolsData
+                                [poolAddress]: pd, // Add or update the specific pool data
+                            }));
+                        }
                     }
                 }
             }
@@ -105,10 +113,11 @@ export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted 
                     <h4 className="token" key={p}> {p} </h4>
                 ))}
             </div>
-            <div className="token-title-bar">
+            <div className="pool-data-container">
                 {Object.keys(poolsData).map((pd) => (
                     <Pool poolData={poolsData[pd]} sendLastData={receivePoolData} />))}
             </div>
+            <Arbitro pools={Object.values(poolsData)}/>
         </>
     );
 }

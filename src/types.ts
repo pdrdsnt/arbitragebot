@@ -54,20 +54,21 @@ export class TradeRoute{
 
 export class Trade{
     
-    token0: boolean;
+    from0: boolean;
     poolData: PoolData;
     amount: number
     price_impact: BigNumber = BigNumber(0)
-    fee: number = 0
+    out: number = 0
 
     constructor(
+        from0: boolean,
         poolData: PoolData,
-        token0 = true,
-        amount = 1
+        amount = 1,
+       
     ){
-        this.amount = amount
-        this.token0 = token0
-        this.poolData = poolData
+        this.from0 = from0;
+        this.amount = amount;
+        this.poolData = poolData;
     }
 };
 
@@ -107,10 +108,11 @@ export class PoolData {
         address: string,
         token0: TokenData,
         token1: TokenData,
+        fee: number, 
         decimals: Array<number>,
         volume = BigNumber(0),
         price = BigNumber(0),
-        fee = 0.03,        
+           
     ){
         this.tokens_id = tokens_id;
         this.contract = contract;
