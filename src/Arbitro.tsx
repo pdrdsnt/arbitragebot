@@ -32,7 +32,7 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
             if (checkedTokens.includes(tokenAddress)) continue;
             checkedTokens.push(tokenAddress);
             const tokenPools = poolsByToken[tokenAddress];
-            getPathsOfToken(tokenAddress,tokenAddress,100)
+            getPathsOfToken(tokenAddress,tokenAddress,100,new TradeRoute())
         }
     }
 
@@ -40,26 +40,26 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
     const getOtherTknAddrFromDir = (poolDir: TknDirInPool) => {return poolDir.isToken0 ? poolDir.pool.token1.address : poolDir.pool.token0.address}
     
 
-    function getPathsOfToken(origin: string, current: string,amount: number,path: TradeRoute = new TradeRoute,checked: string[] = []) : Record<string,TradeRoute> {
-        if(origin == current){return path}
-        if(checked.includes(current))return [];
+    function getPathsOfToken(origin: string, current: string,amount: number,path: TradeRoute | null,checked: string[] = []) : TradeRoute | null{
+        if(origin == current)return path
+        if(checked.includes(current))return null;
         checked.push(current)
 
         const targets = poolsByToken[current].reduce<TknDirInPool[]>((acc,pool) => {
             acc.push(pool)
             return acc
         },[])
-
-        const r: Trade[] = [];
+        
+        const new_route: TradeRoute = new TradeRoute()
         targets.forEach((t) => {
-            
+            const route = getPathsOfToken(origin,getOtherTknAddrFromDir(t),amount,path,checked)
+            if(route == null)return
             const trade = new Trade(t.isToken0,t.pool,amount)
-
-            path.concat(getPathsOfToken(origin,getOtherTknAddrFromDir(t),amount,path,checked))
+            route.trade = trade;
+            new_route.routes.push(route)
         })
 
-        return path;
-    
+        return new_route;
     }
 
     return (

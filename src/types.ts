@@ -48,8 +48,8 @@ export type Pools = {
 };
 
 export class TradeRoute{
-    trades: Array<Trade> = []
-    margin: Number = 0
+    routes: Array<TradeRoute> = []
+    trade?: Trade;
 }
 
 export class Trade{
