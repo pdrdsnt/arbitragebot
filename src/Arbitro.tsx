@@ -32,14 +32,14 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
             if (checkedTokens.includes(tokenAddress)) continue;
             checkedTokens.push(tokenAddress);
             const tokenPools = poolsByToken[tokenAddress];
-            getPathsOfToken(tokenAddress,tokenAddress,100,new TradeRoute())
+            return getPathsOfToken(tokenAddress,tokenAddress,100,new TradeRoute())
         }
     }
 
     const getTknAddrFromDir = (poolDir: TknDirInPool) => {return poolDir.isToken0 ? poolDir.pool.token0.address : poolDir.pool.token1.address}
     const getOtherTknAddrFromDir = (poolDir: TknDirInPool) => {return poolDir.isToken0 ? poolDir.pool.token1.address : poolDir.pool.token0.address}
     
-
+    const pairs = Arbitro()
     function getPathsOfToken(origin: string, current: string,amount: number,path: TradeRoute | null,checked: string[] = []) : TradeRoute | null{
         if(origin == current)return path
         if(checked.includes(current))return null;
@@ -52,9 +52,11 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
         
         const new_route: TradeRoute = new TradeRoute()
         targets.forEach((t) => {
+            const trade = new Trade(t.isToken0,t.pool,amount)
+            const amountOut = trade.CalculatePrice();
             const route = getPathsOfToken(origin,getOtherTknAddrFromDir(t),amount,path,checked)
             if(route == null)return
-            const trade = new Trade(t.isToken0,t.pool,amount)
+           
             route.trade = trade;
             new_route.routes.push(route)
         })
@@ -62,10 +64,14 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
         return new_route;
     }
 
+    const show_paths = () => {
+        
+    }
+
     return (
         <div className="floating-bar">
             <div className="token-container">
-                <h2>ARBITRO</h2>
+                <div className="token-title-bar">ARBITRO</div>
                 <InputNumber set_value={setAmount} value={amount} />
             </div>
         </div>

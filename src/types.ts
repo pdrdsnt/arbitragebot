@@ -54,11 +54,9 @@ export class TradeRoute{
 
 export class Trade{
     
-    from0: boolean;
+    from0: boolean; 
     poolData: PoolData;
     amount: number
-    price_impact: BigNumber = BigNumber(0)
-    out: number = 0
 
     constructor(
         from0: boolean,
@@ -70,6 +68,17 @@ export class Trade{
         this.amount = amount;
         this.poolData = poolData;
     }
+    
+    CalculatePrice(): number 
+    {
+        let price = this.from0 ? this.poolData.price : BigNumber(1).div(this.poolData.price);
+        
+        let price_impact = 0
+        
+        
+        return 0
+    }
+    
 };
 
 export class PoolPath {
@@ -96,7 +105,7 @@ export class PoolData {
     address: string;
     token0: TokenData;
     token1: TokenData;
-    volume: BigNumber
+    reserves: Record<string,BigNumber[]>
     price: BigNumber;
     fee: number;
     decimals: Array<number>;
@@ -110,7 +119,7 @@ export class PoolData {
         token1: TokenData,
         fee: number, 
         decimals: Array<number>,
-        volume = BigNumber(0),
+        reserves = {},
         price = BigNumber(0),
            
     ){
@@ -121,7 +130,7 @@ export class PoolData {
         this.address = address;
         this.token0 = token0;
         this.token1 = token1;
-        this.volume = volume;
+        this.reserves = reserves;
         this.price = price;
         this.fee = fee;
         this.decimals = decimals;

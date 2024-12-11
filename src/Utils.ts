@@ -42,9 +42,16 @@ export async function UpdateV3Data(poolContract: ethers.Contract, pool_data: Poo
         decodeSqrtPriceX96Big(slot0[0] as bigint)
     )
 
-    const volume = await poolContract.liquidity();
+    const liquidity = await poolContract.liquidity();
+
+    const [reserve0, reserve1] = calculateReservesFromLiquidity(
+        liquidity,
+        price,
+        slot0.tick
+    );
+  
     pool_data.price = price;
-    pool_data.volume = volume.toString()
+    pool_data.reserves[price.toString()] = [reserve0,reserve1];
 
     return pool_data;
 }
@@ -59,10 +66,26 @@ export async function UpdateV2Data(poolContract: ethers.Contract, pool_data: Poo
         [reserve0, reserve1]
     )
 
-    pool_data.volume = new BigNumber(reserve0.plus(reserve1).toString());
+    pool_data.reserves[price.toString()] = [reserve0,reserve1];
     pool_data.price = price
     
     return pool_data;
+}
+
+function calculateReservesFromLiquidity(
+    liquidity: bigint,
+    price: BigNumber,
+    tick: number
+): [BigNumber, BigNumber] {
+    // Perform calculations to determine reserves based on liquidity and price
+    // This would depend on the exact formula for Uniswap V3's reserve calculation
+    // Placeholder implementation:
+
+    const sqrtPrice = price.sqrt();
+    const reserve0 = new BigNumber(liquidity.toString()).dividedBy(sqrtPrice);
+    const reserve1 = new BigNumber(liquidity.toString()).multipliedBy(sqrtPrice);
+
+    return [reserve0, reserve1];
 }
 function decodeSimplePrice(
     reserves: BigNumber[],
@@ -88,24 +111,24 @@ function decodeSqrtPriceX96Big(
 
     return price; // Adjust to desired precision
 }
-/*
-export async function getNearestInitializedTicks(poolData: PoolData) {
+
+export async function getNearestInitializedTicks(poolData: PoolData,tick: number) {
     // Calculate the word position and bit position
-    const wordPosition = Math.floor(poolData.tick / 2 ** 8);
-    const bitPosition = Math.floor((poolData.tick % 2 ** 8) / 10);
+    const wordPosition = Math.floor(tick / 2 ** 8);
+    const bitPosition = Math.floor((tick % 2 ** 8) / 10);
 
     // Fetch the tick bitmap
     const tickBitmap = await poolData.contract.tickBitmap(wordPosition);
 
     // Check current tick initialization
     if ((tickBitmap & (1 << bitPosition)) !== 0) {
-        const tickData = await poolData.contract.ticks(poolData.tick);
-        return { tick: poolData.tick, tickData };
+        const tickData = await poolData.contract.ticks(tick);
+        return { tick: tick, tickData };
     }
 
     // Scan for nearest initialized ticks
-    let searchUp = poolData.tick;
-    let searchDown = poolData.tick;
+    let searchUp = tick;
+    let searchDown = tick;
     while (true) {
         searchUp += 10;
         searchDown -= 10;
@@ -121,7 +144,7 @@ export async function getNearestInitializedTicks(poolData: PoolData) {
         } catch {}
     }
 }
-*/
+
 export async function getTickData(poolData: PoolData, currentTick: number) {
     const wordPosition = Math.floor(currentTick / 256);  // Which bitmap word contains the tick
     const bitPosition = currentTick % 256;  // Which bit represents the tick in that word

@@ -4,12 +4,14 @@
   margin: 0 auto;
   padding: 0.5rem; /* Reduced padding */
   text-align: center;
+  font-size: 1.2em; /* Increased base font size */
 }
 
 /* Responsive Grid */
 .cards-view {
+  justify-content: start;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
   gap: 10px; /* Reduced gap */
   width: 90%;
   margin: 1em auto; /* Reduced margin */
@@ -20,6 +22,7 @@
 .token-title-bar {
   display: flex;
   flex-wrap: wrap;
+  font-size: 0.8em; /* Increased font size */
   justify-content: space-between;
   align-items: center;
   padding: 0.5em; /* Reduced padding */
@@ -29,25 +32,27 @@
 
 /* Token Container */
 .token-container {
-  display: flexbox;
+  display: flex;
   flex-wrap: wrap-reverse;
-  align-items: center;
-  margin-left: 0.5em; /* Reduced margin */
+  align-items: self-start;
+  margin-left: 0.2em; /* Reduced margin */
 }
 
 /* Tokens Names */
 .tokens-names-in-card {
   display: flexbox;
-  font-size: 50%;
+  font-size: 0.7em; /* Increased font size */
   background-color: #2e0e0e09;
+  width: 90%;;
 }
 
 /* Pool Card */
 .pool-card {
-  background-color: rgb(5, 1, 1);
+  background-color:#2e0e0e09;
   padding: 0.5em; /* Reduced padding */
   border-radius: 4px;
   transition: filter 300ms ease-in-out;
+  width: 100%;
 }
 
 .pool-card:hover {
@@ -67,9 +72,8 @@
 }
 
 .pool-data-element {
-  font-size: 0.9rem;
+  font-size: 1em; /* Increased font size */
   padding: 0.3em; /* Reduced padding */
-  background-color: rgb(129, 34, 34);
   border-radius: 4px;
   margin-bottom: 0.3em; /* Reduced margin */
 }
@@ -77,36 +81,54 @@
 /* Pool Data Titles */
 .pool-data-dex-title {
   text-align: left;
-  font-size: 0.7rem;
+  font-size: 0.9em; /* Increased font size */
 }
 
 .pool-data-property-title {
   text-align: left;
-  font-size: 0.6rem;
+  font-size: 0.8em; /* Increased font size */
 }
 .pool-data-property-result {
   display: flex;
   justify-content: space-between; /* Push items to opposite sides */
   align-items: center; /* Align items vertically if needed */
-  font-size: 1.0em;
+  font-size: 1.2em; /* Increased font size */
   text-align: justify;
+  color:rgb(25, 154, 154);
+  font-size: 90%;
 }
-.pool-data-dex-data {
-  text-align: left;
-  font-size: 1em;
+
+.pool-data-property-result-2 {
+  display: flex;
+  justify-content: space-between; /* Push items to opposite sides */
+  align-items: center; /* Align items vertically if needed */
+  font-size: 1.2em; /* Increased font size */
+  text-align: end;
+  color:rgb(80, 73, 214);
+  font-size: 38%;
+  padding-left: 2em;
+}
+.left-side-pool-data {
+ 
+  position: relative;
+  top: 20px; /* Adjust the top position as needed */
+  left: 0;
+  padding-block-end: 2em;
+  padding-right: 4em;
+  font-size: 100%;
 }
 
 .title-bar {
   display: flex;
   background-color: #000;
-  align-items: center;
+  align-items: safe;
   justify-content: space-between;
 }
 
 .title-in-bar {
   color: #d82e2e;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size: xx-large;
+  font-size: 2em; /* Increased font size */
   margin-left: 0.2em;
   padding-top: 0.1em; /* Reduced padding */
 }
@@ -132,7 +154,7 @@
 
 /* Pool Address */
 .address {
-  font-size: 0.25rem;
+  font-size: 0.5em; /* Increased font size */
   font-stretch: extra-condensed;
 }
 
@@ -140,6 +162,7 @@
 .pair-name {
   margin-bottom: 0.3em; /* Reduced margin */
   font-weight: bold;
+  font-size: 1.1em; /* Increased font size */
 }
 
 /* Main View */
@@ -151,7 +174,7 @@
 }
 
 /* Specific Responsiveness */
-@media (max-width: 768px) {
+@media (max-width: 50px) {
   .cards-view {
     flex-direction: column;
     gap: 0.5em; /* Reduced gap */
@@ -163,7 +186,7 @@
   }
 
   .pool-data-element {
-    font-size: 0.8rem;
+    font-size: 0.9em; /* Increased font size */
   }
 
   .token-title-bar {
@@ -177,16 +200,77 @@
   height: 50em; /* Reduced height */
 }
 
+/* General Styles */
+body {
+  font-family: 'Courier New', Courier, monospace;
+  color: #00FF00; /* Neon green text */
+  background-color: #000; /* Dark background */
+  margin: 0;
+  overflow:auto;
+}
+
+/* Specific Styles */
+#root {
+  /* ... */
+  color: inherit; /* Inherit the neon green color */
+}
+
+.cards-view {
+  /* ... */
+  background-color: rgba(0, 0, 0, 0.8); /* Darker background */
+}
+
+.token-title-bar {
+  /* ... */
+  color: #FF0000; /* Neon red text */
+}
+
+.token-container, .tokens-names-in-card {
+  color: #00FF00;
+}
+
+.pool-card, .pool-data {
+  border: 2px solid #00FF00; /* Neon green border */
+  box-shadow: 0 0 10px #00FF00; /* Neon green glow */
+}
+
+.pool-data-element {
+  background-color: #FF00FF; /* Neon purple background */
+  box-shadow: 0 0 10px #FF00FF; /* Neon purple glow */
+}
+
+.pool-data-property-result, .pool-data-property-result-2 {
+  color: #00FF00;
+  text-shadow: 0 0 5px #00FF00;
+}
+
+.left-side-pool-data {
+  /* ... */
+  color: #000; /* Black text on red background */
+}
+
+.title-bar, .mini-title-bar {
+  color: #00FF00;
+}
+
+.title-in-bar {
+  color: #FF0000;
+  text-shadow: 0 0 5px #FF0000;
+}
+
+
+/* Floating Bar */
 .floating-bar {
+  display: inline;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  margin-bottom: 10px;
-  height: 5em; /* Reduced height */
-  background-color: rgba(149, 206, 152, 0.945);
-  color: rgb(0, 0, 0);
+  
+  height: 2em;
+  background-color: rgba(255, 0, 0, 0.9);
+  color: #000;
   text-align: center;
-  padding: 20px 2px; /* Reduced padding */
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
-  display: flex;
+  padding: 0.5em;
+  font-size: 1.2em;
 }

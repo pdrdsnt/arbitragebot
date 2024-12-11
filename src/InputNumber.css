@@ -10,7 +10,9 @@
 }
 
 .input-number:focus {
-
+    align-self: center;
+    width: 40%;
+    background-color: #81071c;
     border-color: #81071c; /* Highlight border color on focus */
     box-shadow: 0 0 5px rgba(90, 5, 27, 0.5); /* Add subtle glow */
 }

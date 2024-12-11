@@ -5,7 +5,6 @@ import { PoolData, ChainData, Exchanges, ExchangeVersion } from "./types";
 import { ethers } from "ethers";
 import { GetNamesByUniqueId, PairUniqueId } from "./Utils";
 import Pool from "./pool";
-import Arbitro from "./Arbitro";
 export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted }: { tokens_addr: Array<string>, handlePools: CallableFunction, setIsMounted: CallableFunction }) {
 
     const _ctx: ChainData = useContext(ctx);
@@ -45,7 +44,7 @@ export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted 
 
                 if (factoryContract) {
                     let poolAddress: string = "";
-                    const fees: number[] = [100, 500, 1000, 2000,2500, 3000]; // List all fee tiers
+                    const fees: number[] = [100, 500, 1000, 2000, 2500, 3000]; // List all fee tiers
                     for (let f of fees) {
                         if (version == "v3") {
                             try {
@@ -108,16 +107,20 @@ export default function PoolsContainer({ tokens_addr, handlePools, setIsMounted 
 
     return (
         <>
-            <div className="tokens-names-in-card" key={tokens_id + "0"}>
-                {GetNamesByUniqueId(tokens_id, " /").map((p) => (
-                    <h4 className="token" key={p}> {p} </h4>
+            <div className="pool-view" key={tokens_id + "0"}>
+                {GetNamesByUniqueId(tokens_id, " ").map((p,i) => (
+                    <div className="token-title-bar">
+                        <div className="token" key={p}> {p} </div>
+                        <div className="address" key={_ctx.tokens[tokens_addr[i]].address}> {_ctx.tokens[tokens_addr[i]].address} </div>
+                    </div>
+
                 ))}
             </div>
             <div className="pool-data-container">
                 {Object.keys(poolsData).map((pd) => (
                     <Pool poolData={poolsData[pd]} sendLastData={receivePoolData} />))}
             </div>
-            <Arbitro pools={Object.values(poolsData)}/>
+           
         </>
     );
 }

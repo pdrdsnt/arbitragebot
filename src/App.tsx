@@ -122,7 +122,7 @@ function App() {
         <ctx.Provider value={_ctx}>
           <div className="cards-view" key={"cardsview"}>
             {selectedPairs.map((pair) => (
-              <div className={"pool-card"} key={pair}>
+              <div key={pair}>
                 <PoolPairView
                   tokens_addr={Utils.GetAdrressesByUniqueId(pair)}
                   handlePools={handleSetPools}
@@ -133,6 +133,7 @@ function App() {
           </div>
         </ctx.Provider>
       </div >
+      <Arbitro pools={Object.values([])} />
       <div className="empty-space" />
     </>
   )
