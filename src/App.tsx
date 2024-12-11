@@ -133,7 +133,7 @@ function App() {
           </div>
         </ctx.Provider>
       </div >
-      <Arbitro pools={Object.values([])} />
+      <Arbitro pools={Object.values(allPools)} />
       <div className="empty-space" />
     </>
   )
