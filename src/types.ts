@@ -69,7 +69,7 @@ export class Trade{
         this.poolData = poolData;
     }
     
-    CalculatePrice(): number 
+    Swap(): number 
     {
         let price = this.from0 ? this.poolData.price : BigNumber(1).div(this.poolData.price);
         

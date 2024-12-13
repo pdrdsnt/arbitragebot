@@ -8,7 +8,6 @@ import './App.css';
 import PoolPairView from "./PoolsContainer";
 import { ChainData, Exchanges, PoolData, Tokens } from "./types";
 import * as Utils from './Utils';
-import WalletButton from "./WalletButton";
 import TokenSelector from "./TokenSelector";
 import Arbitro from "./Arbitro";
 
@@ -67,12 +66,15 @@ function App() {
       (component_ids) => !selectedPairs.includes(component_ids)
     );
 
-    invalidPairs.forEach((component_ids) => handleSetPools([], component_ids));
+    invalidPairs.forEach((component_ids) => receivePools([], component_ids));
   }, [selectedPairs]);
-  const allPools = useMemo(() => {
-    return Object.values(poolsByComponent).flat();
 
+  const allPools = useMemo(() => {
+    //console.log(Object.values(poolsByComponent).flat())
+    console.log("updated memo  - " + Object.values(poolsByComponent).flat().length)
+    return Object.values(poolsByComponent).flat();
   }, [poolsByComponent]);
+
   const handleMountedComponents = (component_id: string, isMounted: boolean) => {
     setMountedPoolContainers((prevSet) => {
       const updatedSet = new Set(prevSet); // Create a new Set based on the previous state
@@ -84,12 +86,14 @@ function App() {
       return updatedSet; // Return the new Set to update the state
     });
   }
-  const handleSetPools = (pools: Array<PoolData>, component_id: string) => {
-    console.log("updating pools in parent")
+  const receivePools = (pools: Array<PoolData>, component_id: string) => {
+    
     if(!mountedPoolsContainers.has(component_id)){
       console.log("called by unmonted component")
       return
     }
+
+    console.log("updating pools in parent: " + pools.length)
     setPoolsByComponent((prev) => {
       const updatedPools = { ...prev };
       if (pools.length === 0) {
@@ -100,6 +104,7 @@ function App() {
         updatedPools[component_id] = pools;
       }
       return updatedPools; // Return a new object reference
+      
     });
   };
   const selectToken = (tkn: string) => {
@@ -109,33 +114,28 @@ function App() {
       setSelectedTokens(selectedTokens.filter((x) => x != tkn))
     }
   }
-
+  
   return (
-    <>
-
-      <div className="title-bar" key={"title_bar"}>
-        <div className="title-in-bar">💀</div>
+    <div className="main-view">
         <TokenSelector handleTokenSelect={selectToken} selectedTokens={selectedTokens} />
-        <WalletButton />
-      </div>
-      <div className="main-view" key={"main_view"}>
         <ctx.Provider value={_ctx}>
           <div className="cards-view" key={"cardsview"}>
+            
             {selectedPairs.map((pair) => (
               <div key={pair}>
                 <PoolPairView
                   tokens_addr={Utils.GetAdrressesByUniqueId(pair)}
-                  handlePools={handleSetPools}
+                  sendPools={receivePools}
                   setIsMounted={handleMountedComponents}
                 />
               </div>
             ))}
           </div>
         </ctx.Provider>
-      </div >
-      <Arbitro pools={Object.values(allPools)} />
+     
+          <Arbitro pools={allPools}/>
       <div className="empty-space" />
-    </>
+    </div>
   )
 }
 

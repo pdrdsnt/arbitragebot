@@ -85,7 +85,8 @@ export default function WalletButton()
 
     return (<button onClick={handleClick} style={{
         borderRadius: '0',
-        alignSelf: "stretch",
+        backgroundColor: 'black',
+        alignSelf: "start",
     }}>{isConnected ? "disconnect" : "connect"}
         <div className="address">{signerAddress}</div>
     </button>)

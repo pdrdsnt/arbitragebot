@@ -27,7 +27,6 @@ export default function PoolsSeeker({ pools }:{ pools: Array<PoolData> }) {
                             <div className="pool-data-elemet">
                                 <div className="mini-title-bar">
                                     <div className="pool-data-dex-title">{p.dex + " " + p.version}</div>
-                                    <div className="pool-data-property-title">{p.volume.toString()}</div>
                                 </div>
                                 <div>
                                     <div className="pool-data-data-container" key={"priceview"}>

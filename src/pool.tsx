@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { PoolData, RequestsStream } from "./types";
-import { GetNamesByUniqueId, PairUniqueId, UpdateV2Data, UpdateV3Data } from "./Utils";
+import { PairUniqueId, UpdateV2Data, UpdateV3Data } from "./Utils";
 import { PromiseState } from "./PromiseState";
-import { assert } from "ethers";
 
-export default function Pool({ poolData, sendLastData }: { poolData: PoolData, sendLastData: CallableFunction }) {
+export default function Pool({ poolData, sendLastData, idx }: { poolData: PoolData, sendLastData: CallableFunction, idx: number }) {
     const tokens_addr = [poolData.token0.address, poolData.token1.address]
     const tokens_id = PairUniqueId(tokens_addr[0], tokens_addr[1])
     const [trigger, setTrigger] = useState(false)
@@ -40,7 +39,7 @@ export default function Pool({ poolData, sendLastData }: { poolData: PoolData, s
                 r.getState()
                 if (r.done && r.result) {
                     setLatestData(r.result)
-                    console.log("updated: " + r.result.dex + " version: " + r.result.version)
+                    sendLastData(r.result,idx)
                 }
             }
         }
@@ -63,8 +62,6 @@ export default function Pool({ poolData, sendLastData }: { poolData: PoolData, s
         const d = latestData;
         if (!d)return
         const priceString: string = d.price.toString()
-        const tkn0 = d.token0.name
-        const tkn1 = d.token1.name
         return (
             <>
                 <div className="pool-data-property-result">{priceString}</div>

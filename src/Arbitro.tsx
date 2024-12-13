@@ -2,9 +2,10 @@ import { PoolData, Trade, TradeRoute } from "./types";
 import "./App.css"
 import InputNumber from "./InputNumber";
 import { useState } from "react";
+import WalletButton from "./WalletButton";
 export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
     const [amount, setAmount] = useState("100");
-
+    //console.log("pools received by Arbitro: " + pools.length)
     // to know what token each tokens is in pools, this only makes sense with poolsByToken
     class TknDirInPool {
         pool: PoolData;
@@ -27,6 +28,7 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
     const checkedTokens: string[] = [];
 
     function Arbitro() {
+        console.log("arbityo pools lenght: "+pools.length)
         for (const tokenAddress of tokens) {
             if (checkedTokens.includes(tokenAddress)) continue;
             checkedTokens.push(tokenAddress);
@@ -51,8 +53,8 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
         const new_route: TradeRoute = new TradeRoute()
         targets.forEach((t) => {
             const trade = new Trade(t.isToken0, t.pool, amount)
-            const amountOut = trade.CalculatePrice();
-            const route = getPathsOfToken(origin, getOtherTknAddrFromDir(t), amount, path, checked)
+            const amountOut = trade.Swap();
+            const route = getPathsOfToken(origin, getOtherTknAddrFromDir(t), amountOut, path, checked)
             if (route == null) return
 
             route.trade = trade;
@@ -85,12 +87,13 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
 
     return (
         <div className="floating-bar">
-            <div className="token-container">
-                <div className="token-title-bar">ARBITRO</div>
+            <div className="floating-bar-bar">
+                <div>ARBITRO</div>
                 <InputNumber set_value={setAmount} value={amount} />
-                <div> 
-                    {GetPaths()?.map((x) => x.map((_x) => {return (<div>_x.token0?_x.pool.token0.name:_x.pool.token1.name</div>)}))}
-                </div>
+                <WalletButton />
+            </div>
+            <div className="floating-bar-bar">
+                {GetPaths()?.map((x) => x.map((_x) => {return (<div>_x.token0?_x.pool.token0.name:_x.pool.token1.name</div>)}))}
             </div>
         </div>
     );

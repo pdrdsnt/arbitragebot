@@ -1,0 +1,47 @@
+/* TokenSelector.css */
+
+.token-selector {
+    position: relative;
+  }
+  
+  .token-selector input {
+    /* Base styles for the input field */
+    border: 0px;
+    border-color: #880707;
+    align-self: center;
+    background-color: #880707;
+    cursor: pointer;
+    width: 50em;
+    padding-top: 2em;
+    outline: none;
+   
+  }
+  
+  .token-selector ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #000000;
+    box-shadow: 0 2px 5px rgba(255, 0, 0, 0.1);
+    z-index: 1;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .token-selector li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .token-selector li:hover {
+    background-color: #000000;
+    border-radius: 0px;
+  }
+  
+  .token-selector li.selected {
+    background-color: #000000;
+    font-weight: bold;
+  }

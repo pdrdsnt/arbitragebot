@@ -1,5 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { ctx } from "./App"; // Adjust the import path as per your project structure.
+import "./TokenSelector.css" // Import the CSS file
 
 function TokenSelector({
   handleTokenSelect,
@@ -36,11 +37,11 @@ function TokenSelector({
   }, [isDropdownOpen]);
 
   return (
-    <div ref={dropdownRef}>
+    <div className="token-selector" ref={dropdownRef}>
       {/* Input field */}
       <div>
         <input
-          className="token-title-bar"
+          className="token-selector__input"
           readOnly
           onClick={toggleDropdown}
           aria-haspopup="listbox"
@@ -50,15 +51,12 @@ function TokenSelector({
 
       {/* Dropdown menu */}
       {isDropdownOpen && (
-        <ul
-          className="pool-view"
-        >
+        <ul className="token-selector__dropdown">
           {tokens.length > 0 ? (
             tokens.map((token) => (
               <li
-               className="address"
-                
-                onMouseEnter={(e: any) => (e.target.style.backgroundColor = "rgb(26, 8, 48)")}
+                className={`token-selector__item ${selectedTokens.includes(token) ? 'token-selector__item--selected' : ''}`}
+                onMouseEnter={(e: any) => { e.target.style.backgroundColor = "rgb(26, 8, 48)"}}
                 onMouseLeave={(e: any) => (e.target.style.backgroundColor =  selectedTokens.includes(token) ? "rgb(22, 12, 42)" : "black")}
                 onClick={() => handleTokenSelect(token)}
               >
@@ -66,10 +64,7 @@ function TokenSelector({
               </li>
             ))
           ) : (
-            <li
-                onMouseEnter={(e: any) => (e.target.style.backgroundColor = "black")}
-                onMouseLeave={(e: any) => (e.target.style.backgroundColor = "black")}
-            >
+            <li className="token-selector__item">
               No tokens available
             </li>
           )}
