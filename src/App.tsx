@@ -71,7 +71,7 @@ function App() {
 
   const allPools = useMemo(() => {
     //console.log(Object.values(poolsByComponent).flat())
-    console.log("updated memo  - " + Object.values(poolsByComponent).flat().length)
+  //  console.log("updated memo  - " + Object.values(poolsByComponent).flat().length)
     return Object.values(poolsByComponent).flat();
   }, [poolsByComponent]);
 
@@ -93,7 +93,7 @@ function App() {
       return
     }
 
-    console.log("updating pools in parent: " + pools.length)
+   // console.log("updating pools in parent: " + pools.length)
     setPoolsByComponent((prev) => {
       const updatedPools = { ...prev };
       if (pools.length === 0) {

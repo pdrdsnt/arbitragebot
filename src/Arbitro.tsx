@@ -25,24 +25,35 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
     }, {});
 
     const tokens: string[] = Object.keys(poolsByToken);
-    const checkedTokens: string[] = [];
 
     function Arbitro() {
-        console.log("arbityo pools lenght: "+pools.length)
+        
         for (const tokenAddress of tokens) {
-            if (checkedTokens.includes(tokenAddress)) continue;
-            checkedTokens.push(tokenAddress);
-            return getPathsOfToken(tokenAddress, tokenAddress, 100, new TradeRoute())
+            console.log("started for: " + tokenAddress)
+            const r: TradeRoute = getTradeRoute(tokenAddress, tokenAddress, 100, null)
+            return extractPaths(r)
         }
+        
     }
 
     //const getTknAddrFromDir = (poolDir: TknDirInPool) => { return poolDir.isToken0 ? poolDir.pool.token0.address : poolDir.pool.token1.address }
     const getOtherTknAddrFromDir = (poolDir: TknDirInPool) => { return poolDir.isToken0 ? poolDir.pool.token1.address : poolDir.pool.token0.address }
 
-
-    function getPathsOfToken(origin: string, current: string, amount: number, path: TradeRoute | null, checked: string[] = []): TradeRoute | null {
-        if (origin == current) return path
-        if (checked.includes(current)) return null;
+    const paths = Arbitro()
+    console.log("result: " + paths)
+    function getTradeRoute(
+        origin: string,
+        current: string,
+        amount: number,
+        trade: Trade | null,
+        checked: string[] = []): TradeRoute {
+        
+        const tradeRoute = new TradeRoute()
+        if(trade)tradeRoute.trade = trade
+        if(checked.length > 0 && checked.includes(current))return tradeRoute
+        if(origin == current && trade)return tradeRoute
+        
+        
         checked.push(current)
 
         const targets = poolsByToken[current].reduce<TknDirInPool[]>((acc, pool) => {
@@ -50,18 +61,23 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
             return acc
         }, [])
 
-        const new_route: TradeRoute = new TradeRoute()
-        targets.forEach((t) => {
-            const trade = new Trade(t.isToken0, t.pool, amount)
-            const amountOut = trade.Swap();
-            const route = getPathsOfToken(origin, getOtherTknAddrFromDir(t), amountOut, path, checked)
-            if (route == null) return
+        const new_routes: TradeRoute[] = [];
 
-            route.trade = trade;
-            new_route.routes.push(route)
+        targets.forEach((t) => {
+            if(trade == null){
+            }else{
+            }
+            const new_trade = new Trade(t.isToken0, t.pool, amount)
+            const amountOut = new_trade.Swap();
+            const route = getTradeRoute(origin, getOtherTknAddrFromDir(t), amountOut, new_trade, checked)
+            console.log( "on pool: " + t.pool.address)
+            console.log( "comming from: " + trade?.poolData.address)
+            route.trade = new_trade;
+            new_routes.push(route)
         })
 
-        return new_route;
+        tradeRoute.routes = new_routes;
+        return tradeRoute;
     }
 
     function extractPaths(route: TradeRoute): Array<Array<Trade>> {
@@ -78,13 +94,6 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
         return paths
     }
 
-    const GetPaths = () => {
-        const pairs = Arbitro()
-        if (!pairs) return
-        const paths = extractPaths(pairs)
-        return paths
-    }
-
     return (
         <div className="floating-bar">
             <div className="floating-bar-bar">
@@ -93,7 +102,7 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
                 <WalletButton />
             </div>
             <div className="floating-bar-bar">
-                {GetPaths()?.map((x) => x.map((_x) => {return (<div>_x.token0?_x.pool.token0.name:_x.pool.token1.name</div>)}))}
+               
             </div>
         </div>
     );

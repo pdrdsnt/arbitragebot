@@ -56,7 +56,7 @@ function TokenSelector({
             tokens.map((token) => (
               <li
                 className={`token-selector__item ${selectedTokens.includes(token) ? 'token-selector__item--selected' : ''}`}
-                onMouseEnter={(e: any) => { e.target.style.backgroundColor = "rgb(26, 8, 48)"}}
+                onMouseEnter={(e: any) => {e.target.style.backgroundColor = "rgb(26, 8, 48)"}}
                 onMouseLeave={(e: any) => (e.target.style.backgroundColor =  selectedTokens.includes(token) ? "rgb(22, 12, 42)" : "black")}
                 onClick={() => handleTokenSelect(token)}
               >
