@@ -49,13 +49,15 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
         checked: string[] = []): TradeRoute {
         
         const tradeRoute = new TradeRoute()
-        if(trade)tradeRoute.trade = trade
-        if(checked.length > 0 && checked.includes(current))return tradeRoute
+        if(trade){
+            tradeRoute.trade = trade
+            if(checked.includes(trade.poolData.address))return tradeRoute
+            checked.push(trade.poolData.address)
+        }
+        
         if(origin == current && trade)return tradeRoute
         
         
-        checked.push(current)
-
         const targets = poolsByToken[current].reduce<TknDirInPool[]>((acc, pool) => {
             acc.push(pool)
             return acc
@@ -65,14 +67,14 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
 
         targets.forEach((t) => {
             if(trade == null){
-            }else{
+                //simulate flashloan current on target pool
             }
+            
             const new_trade = new Trade(t.isToken0, t.pool, amount)
             const amountOut = new_trade.Swap();
             const route = getTradeRoute(origin, getOtherTknAddrFromDir(t), amountOut, new_trade, checked)
             console.log( "on pool: " + t.pool.address)
             console.log( "comming from: " + trade?.poolData.address)
-            route.trade = new_trade;
             new_routes.push(route)
         })
 
