@@ -26,33 +26,29 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
 
     const tokens: string[] = Object.keys(poolsByToken);
 
-    function Arbitro() {
-        
+    function Arbitro() : TradeRoute[]{
+        const routes = []
         for (const tokenAddress of tokens) {
             console.log("started for: " + tokenAddress)
             const r: TradeRoute = getTradeRoute(tokenAddress, tokenAddress, 100, null)
-            return extractPaths(r)
+            routes.push(r)
         }
+        console.log("routes: " + routes)
+        return routes
         
     }
 
     //const getTknAddrFromDir = (poolDir: TknDirInPool) => { return poolDir.isToken0 ? poolDir.pool.token0.address : poolDir.pool.token1.address }
     const getOtherTknAddrFromDir = (poolDir: TknDirInPool) => { return poolDir.isToken0 ? poolDir.pool.token1.address : poolDir.pool.token0.address }
 
-    const paths = Arbitro()
-    console.log("result: " + paths)
-    function getTradeRoute(
-        origin: string,
-        current: string,
-        amount: number,
-        trade: Trade | null,
-        checked: string[] = []): TradeRoute {
+    function getTradeRoute(origin: string,current: string,amount: number,trade: Trade | null,checked: string[] = []): TradeRoute {
         
+        const new_checked = [...checked]
+        console.log("checked: " + new_checked.length)
         const tradeRoute = new TradeRoute()
         if(trade){
             tradeRoute.trade = trade
-            if(checked.includes(trade.poolData.address))return tradeRoute
-            checked.push(trade.poolData.address)
+            new_checked.push(trade.poolData.address)
         }
         
         if(origin == current && trade)return tradeRoute
@@ -69,32 +65,45 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
             if(trade == null){
                 //simulate flashloan current on target pool
             }
-            
+            if(new_checked.includes(t.pool.address)){
+                console.log("checked includes pool")
+                return
+            }
             const new_trade = new Trade(t.isToken0, t.pool, amount)
             const amountOut = new_trade.Swap();
-            const route = getTradeRoute(origin, getOtherTknAddrFromDir(t), amountOut, new_trade, checked)
-            console.log( "on pool: " + t.pool.address)
-            console.log( "comming from: " + trade?.poolData.address)
+            const route = getTradeRoute(origin, getOtherTknAddrFromDir(t), amountOut, new_trade, new_checked)
+            //console.log( "on pool: " + t.pool.address)
+            //console.log( "comming from: " + trade?.poolData.address)
             new_routes.push(route)
         })
-
+        console.log("new routes" + new_routes)
         tradeRoute.routes = new_routes;
         return tradeRoute;
     }
 
     function extractPaths(route: TradeRoute): Array<Array<Trade>> {
-        if (!route.trade) return []
-        if (route.routes.length < 1) return [[route.trade]]
-        const paths: Array<Array<Trade>> = []
+        if(!route)return []
+        if (route.routes.length < 1 && route.trade) return [[route.trade]]
+        const paths: Array<Array<Trade>>= []
         for (const i of route.routes) {
             const subpaths = extractPaths(i)
             for (const s of subpaths) {
-                s.push(route.trade)
+                if(route.trade)s.push(route.trade)
                 paths.push([...s])
             }
         }
         return paths
     }
+
+    const routes = Arbitro()
+    const paths = extractPaths(routes[0])
+    paths.forEach((x) => {
+        console.log( "path: " + x)
+        x.forEach((_x,idx) => {
+
+            console.log( "result: " + idx + " - " + _x.poolData.address)
+        })
+    })
 
     return (
         <div className="floating-bar">

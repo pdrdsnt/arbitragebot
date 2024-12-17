@@ -57,7 +57,7 @@ export class Trade{
     from0: boolean; 
     poolData: PoolData;
     amount: number
-
+    
     constructor(
         from0: boolean,
         poolData: PoolData,
