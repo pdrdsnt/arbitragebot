@@ -53,30 +53,53 @@ export class TradeRoute{
 }
 
 export class Trade{
-    
     from0: boolean; 
     poolData: PoolData;
-    amount: number
-    
+    amountIn: BigNumber;
+    amountOut: BigNumber;
     constructor(
         from0: boolean,
         poolData: PoolData,
-        amount = 1,
+        amount = BigNumber(1),
+        amountOut = BigNumber('0')
        
     ){
-        this.from0 = from0;
-        this.amount = amount;
-        this.poolData = poolData;
+        if(!amountOut.isEqualTo('0')){
+            this.from0 = !from0;
+            this.amountIn = amount;
+            this.poolData = poolData;
+            this.amountOut = this.Swap();
+        }else{
+            this.from0 = from0;
+            this.amountIn = amount;
+            this.poolData = poolData;
+            this.amountOut = this.Swap();
+        }
     }
-    
-    Swap(): number 
+     Swap(): BigNumber 
     {
-        let price = this.from0 ? this.poolData.price : BigNumber(1).div(this.poolData.price);
+        let price: BigNumber = this.from0 ? this.poolData.price : BigNumber('1').div(this.poolData.price);
+
+        const fee = BigNumber(this.poolData.fee).div(10_000)
+
+        const fee_amount = this.amountIn.times(fee);
         
-        let price_impact = 0
+        const v = this.amountIn.minus(fee_amount).times(price)
+
+        return v;
+    }
+
+    FlashLoan(): BigNumber
+    {
+        let price: BigNumber = this.from0 ? this.poolData.price : BigNumber('1').div(this.poolData.price);
+
+        const fee = BigNumber(this.poolData.fee).div(10_000)
+
+        const fee_amount = this.amountIn.times(fee);
         
-        
-        return 0
+        const v = this.amountIn.minus(fee_amount).times(price)
+
+        return v;
     }
     
 };

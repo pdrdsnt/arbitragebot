@@ -53,7 +53,7 @@ export default function Pool({ poolData, sendLastData, idx }: { poolData: PoolDa
     useEffect(() => {
         const interval = setInterval(() => {
             setTrigger((prev) => !prev); // Trigger updates
-        }, 2000);
+        }, 10000);
 
         // Cleanup the interval when the component unmounts
         return () => clearInterval(interval);
