@@ -28,8 +28,8 @@ function CurrentChainData(chain: keyof typeof chainsStructure): ChainData {
 export const ctx = createContext<ChainData>(CurrentChainData("bsc") as ChainData);
 
 const providers_adresses = [
-  "wss://bsc.callstaticrpc.com",
   "wss://bsc-rpc.publicnode.com",
+  "wss://bsc.callstaticrpc.com",
   //"https://1rpc.io/bnb",
   //"https://bsc.rpc.blxrbdn.com",
 ]
@@ -132,8 +132,6 @@ function App() {
             ))}
           </div>
         </ctx.Provider>
-     
-          <Arbitro pools={allPools}/>
       <div className="empty-space" />
     </div>
   )

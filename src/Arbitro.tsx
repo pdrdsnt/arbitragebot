@@ -132,7 +132,6 @@ export default function Arbitro({ pools }: { pools: Array<PoolData> }) {
             <div className="floating-bar-bar">
                 <div>ARBITRO</div>
                 <InputNumber set_value={setAmount} value={amount} />
-                <WalletButton />
             </div>
             <div className="floating-bar-bar">
 
